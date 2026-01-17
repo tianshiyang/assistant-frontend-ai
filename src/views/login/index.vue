@@ -19,7 +19,24 @@
           <Register v-if="modelData.type === 'register'" @go-login="modelData.type = 'login'" />
         </div>
         <div class="login-box-right">
-          <a-button type="primary" @click="modelData.type = 'register'">创建新账号</a-button>
+          <h2>关于本项目</h2>
+          <p>1.本项目为个人学习所用项目，可访问如下GitHub链接获取源码</p>
+          <ul>
+            <li>
+              <a-button type="link" @click="handleGoGitHub('frontend')">获取项目前端代码</a-button>
+            </li>
+            <li>
+              <a-button type="link" @click="handleGoGitHub('backend')">获取项目后端代码</a-button>
+            </li>
+          </ul>
+          <p>2.技术栈</p>
+          <ul>
+            <li>前端采用Vue3 + TypeScript+Vite + Ant Design Vue+Pinia + Vue Router</li>
+            <li>
+              后端采用Python + Flask + SQLAlchemy + PostgreSQL + Milvus + LangChain1.0 +
+              LangGraph1.0
+            </li>
+          </ul>
         </div>
       </div>
     </a-modal>
@@ -35,6 +52,14 @@ const modelData = reactive({
   confirmLoading: false,
   type: 'login' as 'login' | 'register',
 })
+
+const handleGoGitHub = (type: 'frontend' | 'backend') => {
+  if (type === 'frontend') {
+    window.open('https://github.com/tianshiyang/assistant-frontend-ai', '_blank')
+  } else {
+    window.open('https://github.com/tianshiyang/assistant-backend-ai', '_blank')
+  }
+}
 </script>
 
 <style scoped lang="scss">
@@ -49,7 +74,7 @@ const modelData = reactive({
 
 .login-box {
   display: flex;
-  align-items: center;
+  align-items: flex-start;
 
   .login-box-left {
     width: 450px;
@@ -70,6 +95,23 @@ const modelData = reactive({
         font-weight: 500;
         font-size: 36px;
       }
+    }
+  }
+  .login-box-right {
+    padding: 40px 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    gap: 10px;
+    p {
+      padding: 0;
+      margin: 0;
+    }
+    ul {
+      margin: 0;
+    }
+    .ant-btn {
+      padding: 0;
     }
   }
 }
