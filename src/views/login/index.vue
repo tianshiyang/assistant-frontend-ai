@@ -3,8 +3,10 @@
 </template>
 
 <script setup lang="ts">
-const handleLogin = () => {
-  console.log('handleLogin')
+import { getUserInfoAPI } from '@/api/account'
+const handleLogin = async () => {
+  const res = await getUserInfoAPI()
+  console.log(res)
 }
 </script>
 
