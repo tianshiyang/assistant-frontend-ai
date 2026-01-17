@@ -1,5 +1,4 @@
 import axios, { type AxiosRequestConfig, type AxiosResponse } from 'axios'
-// import { message } from "ant-design-vue"
 import { getToken } from './storage'
 import { message } from 'ant-design-vue'
 
@@ -59,15 +58,14 @@ export function request<T = unknown>(config: AxiosRequestConfig) {
         return resolve(result.data)
       })
       .catch((error: AxiosResponse<Response<T>>) => {
-        console.log(error)
         switch (error.status) {
           case 200:
-            console.log(error.data.code)
             switch (error.data.code) {
               case ResponseCode.ERROR:
                 message.error(error.data.message)
                 return reject(error.data.message)
               case ResponseCode.UNAUTHORIZED:
+                location.href = '/login'
                 message.error(error.data.message)
                 return reject('登录失效，请重新登录')
             }
