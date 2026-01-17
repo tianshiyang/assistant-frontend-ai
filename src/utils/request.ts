@@ -50,7 +50,7 @@ interface Response<T = unknown> {
   message: string
 }
 
-export function request<T = unknown>(config: AxiosRequestConfig) {
+export function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
   return new Promise((resolve, reject) => {
     api(config)
       .then((res: AxiosResponse<Response<T>>) => {

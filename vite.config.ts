@@ -20,6 +20,11 @@ export default defineConfig({
     AutoImport({
       imports: ['vue', 'vue-router'],
       dts: true, // 生成类型声明文件
+      eslintrc: {
+        enabled: true, // 生成 ESLint 配置文件
+        filepath: './.eslintrc-auto-import.json',
+        globalsPropValue: true,
+      },
     }),
     Components({
       resolvers: [
