@@ -12,7 +12,14 @@ dist
 dist-ssr
 *.local
 
+# 环境变量文件（包含敏感信息）
+.env
 .env.local
+.env.prod
+.env.development
+.env.production
+.env.*
+!.env.example
 
 # Editor directories and files
 .vscode/*
