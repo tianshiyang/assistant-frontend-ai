@@ -16,3 +16,17 @@ export const userLoginAPI = (data: { username: string; password: string }) => {
     data,
   })
 }
+
+// 用户注册
+export const userRegisterAPI = (data: {
+  username: string
+  email: string
+  password: string
+  avatar_url: string
+}) => {
+  return request<{ token: string }>({
+    url: '/api/account/registration',
+    method: 'POST',
+    data,
+  })
+}

@@ -16,10 +16,10 @@
             <div class="logo-text">AI助手</div>
           </div>
           <Login v-if="modelData.type === 'login'" @go-register="modelData.type = 'register'" />
-          <Register v-if="modelData.type === 'register'" />
+          <Register v-if="modelData.type === 'register'" @go-login="modelData.type = 'login'" />
         </div>
         <div class="login-box-right">
-          <a-button type="primary" @click="handleRegister">创建新账号</a-button>
+          <a-button type="primary" @click="modelData.type = 'register'">创建新账号</a-button>
         </div>
       </div>
     </a-modal>
@@ -35,10 +35,6 @@ const modelData = reactive({
   confirmLoading: false,
   type: 'login' as 'login' | 'register',
 })
-
-const handleRegister = async () => {
-  modelData.type = 'login'
-}
 </script>
 
 <style scoped lang="scss">

@@ -7,18 +7,12 @@
     class="login-form"
   >
     <a-form-item name="username">
-      <a-input
-        v-model:value="loginFormData.username"
-        placeholder="请输入账号"
-        size="large"
-        allow-clear
-      />
+      <a-input v-model:value="loginFormData.username" placeholder="请输入账号" allow-clear />
     </a-form-item>
     <a-form-item name="password">
       <a-input-password
         v-model:value="loginFormData.password"
         placeholder="请输入密码"
-        size="large"
         allow-clear
       />
     </a-form-item>

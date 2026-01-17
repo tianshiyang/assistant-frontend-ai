@@ -13,6 +13,7 @@
   "dependencies": {
     "ant-design-vue": "^4.2.6",
     "axios": "^1.13.2",
+    "cos-js-sdk-v5": "^1.5.15",
     "pinia": "^3.0.4",
     "unplugin-auto-import": "^20.3.0",
     "vue": "^3.5.24",
