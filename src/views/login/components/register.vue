@@ -6,31 +6,31 @@
     layout="vertical"
     class="register-form"
   >
-    <a-form-item name="username" label="用户名">
+    <a-form-item name="username">
       <a-input
         v-model:value="registerFormData.username"
         placeholder="请输入用户名（4-32位，支持英文、数字）"
         allow-clear
       />
     </a-form-item>
-    <a-form-item name="email" label="邮箱">
+    <a-form-item name="email">
       <a-input v-model:value="registerFormData.email" placeholder="请输入邮箱" allow-clear />
     </a-form-item>
-    <a-form-item name="password" label="密码">
+    <a-form-item name="password">
       <a-input-password
         v-model:value="registerFormData.password"
         placeholder="请输入密码（8-32位，支持英文、数字）"
         allow-clear
       />
     </a-form-item>
-    <a-form-item name="confirmPassword" label="确认密码">
+    <a-form-item name="confirmPassword">
       <a-input-password
         v-model:value="registerFormData.confirmPassword"
         placeholder="请再次输入密码"
         allow-clear
       />
     </a-form-item>
-    <a-form-item name="avatar_url" label="头像">
+    <a-form-item name="avatar_url">
       <div class="avatar-upload">
         <a-upload
           v-model:file-list="fileList"
