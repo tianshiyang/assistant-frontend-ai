@@ -77,7 +77,7 @@ const handleLogin = async () => {
       password: loginFormData.password,
     })
     setToken(res.token)
-    router.push('/home')
+    router.push('/chat')
   } finally {
     loginFormData.confirmLoading = false
   }

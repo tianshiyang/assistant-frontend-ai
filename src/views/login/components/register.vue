@@ -233,7 +233,7 @@ const handleRegister = async () => {
 
     setToken(res.token)
     message.success('注册成功！')
-    router.push('/home')
+    router.push('/chat')
   } finally {
     registerFormData.confirmLoading = false
   }
