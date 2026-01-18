@@ -14,7 +14,7 @@
       >
         <a-menu-item key="/chat">
           <template #icon>
-            <ChatIcon />
+            <ChatIcon class="svg-icon" />
           </template>
           <span>新对话</span>
         </a-menu-item>
@@ -22,7 +22,7 @@
         <a-menu-item-group title="常用功能">
           <a-menu-item key="/dataset">
             <template #icon>
-              <DatasetIcon />
+              <DatasetIcon class="svg-icon" />
             </template>
             <span>我的知识库</span>
           </a-menu-item>
@@ -109,20 +109,8 @@ const handleMenuClick = ({ key }: { key: string }) => {
     height: 100%;
     border-right: none;
 
-    // 选中状态下，图标变为蓝色（与文字颜色一致）
     :deep(.ant-menu-item-selected) {
-      .chat-icon,
-      .dataset-icon {
-        .icon-path {
-          fill: #1890ff; // Ant Design Vue 的主题蓝色
-        }
-      }
-    }
-
-    // 悬停状态下也使用蓝色
-    :deep(.ant-menu-item:hover) {
-      .chat-icon,
-      .dataset-icon {
+      .svg-icon {
         .icon-path {
           fill: #1890ff;
         }
