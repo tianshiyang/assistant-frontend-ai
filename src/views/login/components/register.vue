@@ -88,6 +88,8 @@ import { PlusOutlined } from '@ant-design/icons-vue'
 
 const emit = defineEmits(['go-login'])
 
+const router = useRouter()
+
 const registerFormData = reactive({
   username: '',
   email: '',
@@ -231,8 +233,7 @@ const handleRegister = async () => {
 
     setToken(res.token)
     message.success('注册成功！')
-    // 注册成功后跳转到登录页面
-    emit('go-login')
+    router.push('/home')
   } finally {
     registerFormData.confirmLoading = false
   }

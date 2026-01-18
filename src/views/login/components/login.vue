@@ -43,6 +43,8 @@ import type { FormInstance } from 'ant-design-vue'
 import { userLoginAPI } from '@/api/account'
 import { setToken } from '@/utils/storage'
 
+const router = useRouter()
+
 const emit = defineEmits(['go-register'])
 
 const loginFormData = reactive({
@@ -75,6 +77,7 @@ const handleLogin = async () => {
       password: loginFormData.password,
     })
     setToken(res.token)
+    router.push('/home')
   } finally {
     loginFormData.confirmLoading = false
   }
