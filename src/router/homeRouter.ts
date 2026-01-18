@@ -9,6 +9,11 @@ export const homeRouter = [
         name: 'chat',
         component: () => import('@/views/chat/index.vue'),
       },
+      {
+        path: '/dataset',
+        name: 'dataset',
+        component: () => import('@/views/dataset/index.vue'),
+      },
     ],
   },
 ]

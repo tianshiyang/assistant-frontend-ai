@@ -19,6 +19,14 @@
           <span>新对话</span>
         </a-menu-item>
         <!-- 可以在这里添加更多菜单项 -->
+        <a-menu-item-group title="常用功能">
+          <a-menu-item key="/dataset">
+            <template #icon>
+              <DatasetIcon />
+            </template>
+            <span>我的知识库</span>
+          </a-menu-item>
+        </a-menu-item-group>
       </a-menu>
     </a-layout-sider>
     <a-layout-content class="layout-content">
@@ -33,6 +41,7 @@
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ChatIcon from './icons/ChatIcon.vue'
+import DatasetIcon from './icons/DatasetIcon.vue'
 import { message } from 'ant-design-vue'
 
 const router = useRouter()
@@ -102,7 +111,8 @@ const handleMenuClick = ({ key }: { key: string }) => {
 
     // 选中状态下，图标变为蓝色（与文字颜色一致）
     :deep(.ant-menu-item-selected) {
-      .chat-icon {
+      .chat-icon,
+      .dataset-icon {
         .icon-path {
           fill: #1890ff; // Ant Design Vue 的主题蓝色
         }
@@ -111,7 +121,8 @@ const handleMenuClick = ({ key }: { key: string }) => {
 
     // 悬停状态下也使用蓝色
     :deep(.ant-menu-item:hover) {
-      .chat-icon {
+      .chat-icon,
+      .dataset-icon {
         .icon-path {
           fill: #1890ff;
         }
