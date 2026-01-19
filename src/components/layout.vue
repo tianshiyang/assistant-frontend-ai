@@ -131,7 +131,6 @@ const handleMenuClick = ({ key }: { key: string }) => {
   .content-wrapper {
     min-height: 100%;
     display: flex;
-    justify-content: center;
     align-items: flex-start;
     padding: 24px;
   }

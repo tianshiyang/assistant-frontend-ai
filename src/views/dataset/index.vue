@@ -2,6 +2,7 @@
   <div class="dataset-page">
     <!-- 标题 -->
     <div class="dataset-header">
+      <div class="dataset-header-icon"></div>
       <h1 class="dataset-title">我的知识库</h1>
     </div>
 
@@ -9,9 +10,10 @@
     <div class="dataset-actions">
       <a-input
         v-model:value="searchData.name"
+        style="width: 300px"
         placeholder="搜索知识库名称"
         allow-clear
-        @search="handleSearch"
+        @press-enter="handleSearch"
       />
       <a-button type="primary" @click="handleCreate"> 新建知识库 </a-button>
     </div>
@@ -31,7 +33,10 @@
             @click="handleCardClick(item)"
           >
             <div class="card-header">
-              <h3 class="card-title">{{ item.name }}</h3>
+              <div class="card-title">
+                <img :src="item.icon" class="card-title-icon" />
+                <div class="card-title-text">{{ item.name }}</div>
+              </div>
               <a-dropdown :trigger="['click']">
                 <a-button type="text" class="card-more" @click.stop>
                   <more-outlined />
@@ -86,7 +91,7 @@ const loading = ref(false)
 
 const searchData = reactive({
   page_no: 1,
-  page_size: 12,
+  page_size: 10,
   name: '',
 })
 
@@ -148,10 +153,10 @@ const handleDelete = (item: DatasetItem) => {
 }
 
 // 删除知识库
-const handleMenuClick = (event: 'update' | 'delete', item: DatasetItem) => {
-  if (event === 'update') {
+const handleMenuClick = (event: any, item: DatasetItem) => {
+  if (event.key === 'update') {
     handleEdit(item)
-  } else if (event === 'delete') {
+  } else if (event.key === 'delete') {
     handleDelete(item)
   }
 }
@@ -173,11 +178,18 @@ fetchDatasetList()
 <style scoped lang="scss">
 .dataset-page {
   max-width: 1200px;
-  margin: 0 auto;
-  padding: 24px;
 
   .dataset-header {
     margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    .dataset-header-icon {
+      width: 4px;
+      height: 24px;
+      background: #1890ff;
+      border-radius: 4px;
+    }
 
     .dataset-title {
       font-size: 24px;
@@ -189,15 +201,12 @@ fetchDatasetList()
 
   .dataset-actions {
     display: flex;
-    justify-content: space-between;
     align-items: center;
     margin-bottom: 24px;
     gap: 16px;
   }
 
   .dataset-list {
-    min-height: 400px;
-
     .empty-state {
       display: flex;
       flex-direction: column;
@@ -218,11 +227,13 @@ fetchDatasetList()
     }
 
     .dataset-cards {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
       gap: 16px;
 
       .dataset-card {
+        width: 240px;
         background: #fff;
         border: 1px solid #e8e8e8;
         border-radius: 8px;
@@ -244,12 +255,17 @@ fetchDatasetList()
           .card-title {
             font-size: 16px;
             font-weight: 500;
+            display: flex;
             color: #131313;
-            margin: 0;
-            flex: 1;
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
+            .card-title-icon {
+              width: 24px;
+              height: 24px;
+              border-radius: 50%;
+              margin-right: 8px;
+            }
           }
 
           .card-more {
