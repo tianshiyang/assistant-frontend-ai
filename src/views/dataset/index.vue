@@ -22,8 +22,7 @@
     <div class="dataset-list">
       <a-spin :spinning="loading">
         <div v-if="!tableDataList.list.length" class="empty-state">
-          <inbox-outlined class="empty-icon" />
-          <p class="empty-text">暂无知识库</p>
+          <a-empty />
         </div>
         <div v-else class="dataset-cards">
           <div
@@ -82,7 +81,7 @@
 
 <script lang="ts" setup>
 import { message, Modal } from 'ant-design-vue'
-import { MoreOutlined, InboxOutlined } from '@ant-design/icons-vue'
+import { MoreOutlined } from '@ant-design/icons-vue'
 import { getDatasetListAPI, deleteDatasetAPI } from '@/api/dataset'
 import CreateOrUpdateDatasetModal from './components/CreateOrUpdateDatasetModal.vue'
 import type { DatasetItem } from '@/api/types/dataset'
@@ -178,6 +177,7 @@ fetchDatasetList()
 <style scoped lang="scss">
 .dataset-page {
   max-width: 1200px;
+  width: 100%;
 
   .dataset-header {
     margin-bottom: 24px;
