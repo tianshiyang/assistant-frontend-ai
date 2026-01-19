@@ -12,7 +12,7 @@ enum ResponseCode {
 const api = axios.create({
   // 默认地址请求地址，可在 .env.** 文件中修改
   headers: {
-    token: getToken(),
+    Authorization: `Bearer ${getToken()}`,
     'Content-Type': 'application/json',
   },
 })

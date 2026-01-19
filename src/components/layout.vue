@@ -81,11 +81,15 @@ const handleMenuClick = ({ key }: { key: string }) => {
 .layout-container {
   height: 100vh;
   overflow: hidden;
+  background: #fcfcfd;
+}
+:deep(.ant-menu-light) {
+  background: #fcfcfd;
 }
 
 .layout-sider {
-  background: #fff;
-  border-right: 1px solid #f0f0f0;
+  background: #fcfcfd;
+  border-right: 1px solid rgba(6, 10, 38, 0.03);
   overflow-y: auto;
   overflow-x: hidden;
 
@@ -120,7 +124,7 @@ const handleMenuClick = ({ key }: { key: string }) => {
 }
 
 .layout-content {
-  background: #f0f2f5;
+  background-color: #fff;
   overflow-y: auto;
   overflow-x: hidden;
 
