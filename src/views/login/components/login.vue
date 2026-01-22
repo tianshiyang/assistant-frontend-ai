@@ -40,7 +40,7 @@
 <script lang="ts" setup>
 import type { FormInstance } from 'ant-design-vue'
 
-import { userLoginAPI } from '@/api/account'
+import { userLoginAPI } from '@/api/module/account'
 import { setToken } from '@/utils/storage'
 
 const router = useRouter()

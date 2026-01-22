@@ -14,6 +14,11 @@ export const homeRouter = [
         name: 'dataset',
         component: () => import('@/views/dataset/index.vue'),
       },
+      {
+        path: '/document/:dataset_id/list',
+        name: 'documentList',
+        component: () => import('@/views/document/documentList.vue'),
+      },
     ],
   },
 ]

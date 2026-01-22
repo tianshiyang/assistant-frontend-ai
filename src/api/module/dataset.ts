@@ -1,5 +1,5 @@
 import { request } from '@/utils/request'
-import type { BaseListResponse } from './types'
+import type { BaseListResponse } from '../types'
 import type {
   CreateDatasetParams,
   DatasetItem,
@@ -7,7 +7,7 @@ import type {
   DeleteDatasetParams,
   GetDatasetDetailParams,
   UpdateDatasetParams,
-} from './types/dataset'
+} from '../types/dataset'
 
 // 获取知识库列表
 export const getDatasetListAPI = (params: DatasetListParams) => {

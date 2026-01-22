@@ -57,7 +57,7 @@ import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import type { UploadProps } from 'ant-design-vue'
 import { PlusOutlined } from '@ant-design/icons-vue'
-import { createDatasetAPI, getDatasetDetailAPI, updateDatasetAPI } from '@/api/dataset'
+import { createDatasetAPI, getDatasetDetailAPI, updateDatasetAPI } from '@/api/module/dataset'
 import { uploadToCOS } from '@/utils/cos'
 
 const DEFAULT_ICON_URL =

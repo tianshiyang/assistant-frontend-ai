@@ -92,7 +92,7 @@
 import type { FormInstance, UploadProps } from 'ant-design-vue'
 import { message } from 'ant-design-vue'
 import { uploadToCOS } from '@/utils/cos'
-import { userRegisterAPI } from '@/api/account'
+import { userRegisterAPI } from '@/api/module/account'
 import { setToken } from '@/utils/storage'
 import { PlusOutlined } from '@ant-design/icons-vue'
 

@@ -10,11 +10,14 @@
     <div class="dataset-actions">
       <a-input
         v-model:value="searchData.name"
-        style="width: 300px"
+        style="width: 240px"
         placeholder="搜索知识库名称"
         allow-clear
-        @press-enter="handleSearch"
       />
+      <a-button type="primary" @click="handleSearch"> 搜索 </a-button>
+    </div>
+
+    <div class="create-button-box">
       <a-button type="primary" @click="handleCreate"> 新建知识库 </a-button>
     </div>
 
@@ -82,11 +85,13 @@
 <script lang="ts" setup>
 import { message, Modal } from 'ant-design-vue'
 import { MoreOutlined } from '@ant-design/icons-vue'
-import { getDatasetListAPI, deleteDatasetAPI } from '@/api/dataset'
+import { getDatasetListAPI, deleteDatasetAPI } from '@/api/module/dataset'
 import CreateOrUpdateDatasetModal from './components/CreateOrUpdateDatasetModal.vue'
 import type { DatasetItem } from '@/api/types/dataset'
 
 const loading = ref(false)
+
+const router = useRouter()
 
 const searchData = reactive({
   page_no: 1,
@@ -162,8 +167,9 @@ const handleMenuClick = (event: any, item: DatasetItem) => {
 
 // 卡片点击
 const handleCardClick = (item: DatasetItem) => {
-  // TODO: 跳转到知识库详情页
-  console.log('点击知识库:', item)
+  router.push({
+    path: `/document/${item.id}/list`,
+  })
 }
 
 // 分页变化
@@ -204,6 +210,12 @@ fetchDatasetList()
     align-items: center;
     margin-bottom: 24px;
     gap: 16px;
+  }
+
+  .create-button-box {
+    display: flex;
+    justify-content: flex-end;
+    margin-bottom: 24px;
   }
 
   .dataset-list {
