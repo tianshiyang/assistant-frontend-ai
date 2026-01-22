@@ -1,13 +1,13 @@
 <template>
   <a-modal
     :open="modelValue"
-    title="新建知识库文档"
+    title="上传知识库文档"
     :confirm-loading="loading"
     @ok="uploadDocument"
     @cancel="handleCancel"
   >
     <a-form :model="form" layout="vertical">
-      <a-form-item label="知识库文档" name="icon">
+      <a-form-item name="oss_url">
         <div class="document-upload">
           <a-upload
             v-model:file-list="fileList"
@@ -111,7 +111,6 @@ const handleUpload: UploadProps['customRequest'] = async options => {
 
     form.oss_url = result.url
     fileName.value = fileObj.name
-    message.success('文档上传成功！')
   } catch (error) {
     message.error('文档上传失败，请重试')
     onError?.(error as Error)

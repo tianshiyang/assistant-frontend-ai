@@ -2,7 +2,7 @@
   <div class="document-list-page">
     <div class="document-list-header">
       <div class="document-list-header-icon"></div>
-      <h1 class="document-list-title">我的知识库</h1>
+      <h1 class="document-list-title">{{ pageTitle }}</h1>
     </div>
     <a-form layout="inline">
       <a-form-item>
@@ -67,8 +67,11 @@ import { deleteDocumentAPI, getDocumentListAPI } from '@/api/module/document'
 import { DocumentStatus, DocumentStatusMap, type DocumentItem } from '@/api/types/document'
 import { message } from 'ant-design-vue'
 import CreateDocument from './components/createDocument.vue'
+import { getDatasetDetailAPI } from '@/api/module/dataset'
 
 const route = useRoute()
+
+const pageTitle = ref('')
 
 const searchData = reactive({
   dataset_id: route.params.dataset_id as string,
@@ -138,6 +141,7 @@ const handleDelete = async (record: DocumentItem) => {
   await deleteDocumentAPI({
     document_id: record.id,
   })
+  getDocumentList()
   message.success('删除成功')
 }
 
@@ -151,7 +155,16 @@ const openCreateDocument = () => {
   createDocumentData.visible = true
 }
 
+// 获取知识库详情
+const getDatasetDetail = async () => {
+  const res = await getDatasetDetailAPI({
+    dataset_id: searchData.dataset_id,
+  })
+  pageTitle.value = res.name
+}
+
 // 初始化
+getDatasetDetail()
 getDocumentList()
 </script>
 
