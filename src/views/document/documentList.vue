@@ -4,7 +4,7 @@
       <div class="document-list-header-icon"></div>
       <h1 class="document-list-title">我的知识库</h1>
     </div>
-    <a-form>
+    <a-form layout="inline">
       <a-form-item>
         <a-input
           v-model:value="searchData.name"
@@ -18,6 +18,10 @@
       </a-form-item>
     </a-form>
 
+    <div class="button-style">
+      <a-button type="primary" @click="openCreateDocument"> 上传知识库文档 </a-button>
+    </div>
+
     <a-table :data-source="tableData.list" :columns="columns">
       <template #bodyCell="{ column, text, record }">
         <template v-if="column.dataIndex === 'status'">
@@ -25,10 +29,10 @@
           <a-tag v-if="text === DocumentStatus.PARSING" color="success">
             {{ DocumentStatusMap[text as DocumentStatus] }}
           </a-tag>
-          <a-tag v-else-if="text === DocumentStatus.COMPLETED" color="success">
+          <a-tag v-else-if="text === DocumentStatus.COMPLETED" color="processing">
             {{ DocumentStatusMap[text as DocumentStatus] }}
           </a-tag>
-          <a-tag v-if="text === DocumentStatus.ERROR" color="success">
+          <a-tag v-if="text === DocumentStatus.ERROR" color="error">
             {{ DocumentStatusMap[text as DocumentStatus] }}
           </a-tag>
         </template>
@@ -48,12 +52,22 @@
       </template>
     </a-table>
   </div>
+
+  <!-- 创建知识库文档 -->
+  <CreateDocument
+    v-if="createDocumentData.visible"
+    v-model="createDocumentData.visible"
+    :dataset-id="searchData.dataset_id"
+    @success="getDocumentList"
+  />
 </template>
 
 <script setup lang="ts">
 import { deleteDocumentAPI, getDocumentListAPI } from '@/api/module/document'
 import { DocumentStatus, DocumentStatusMap, type DocumentItem } from '@/api/types/document'
 import { message } from 'ant-design-vue'
+import CreateDocument from './components/createDocument.vue'
+
 const route = useRoute()
 
 const searchData = reactive({
@@ -126,11 +140,27 @@ const handleDelete = async (record: DocumentItem) => {
   })
   message.success('删除成功')
 }
+
+// 创建知识库数据源
+const createDocumentData = reactive({
+  visible: false,
+})
+
+// 打开创建知识库文档
+const openCreateDocument = () => {
+  createDocumentData.visible = true
+}
+
 // 初始化
 getDocumentList()
 </script>
 
 <style lang="scss" scoped>
+.button-style {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 24px;
+}
 .input-style {
   width: 240px;
 }

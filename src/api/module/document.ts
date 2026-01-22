@@ -19,3 +19,12 @@ export const deleteDocumentAPI = (data: { document_id: string }) => {
     data,
   })
 }
+
+// 上传知识库文档
+export const uploadDocumentAPI = (data: { oss_url: string; dataset_id: string }) => {
+  return request({
+    url: `/api/document/upload`,
+    method: 'post',
+    data,
+  })
+}
