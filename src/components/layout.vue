@@ -28,6 +28,10 @@
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
+
+      <div class="user-info-box">
+        <UserInfo />
+      </div>
     </a-layout-sider>
     <a-layout-content class="layout-content">
       <div class="content-wrapper">
@@ -43,6 +47,7 @@ import { useRouter, useRoute } from 'vue-router'
 import ChatIcon from './icons/ChatIcon.vue'
 import DatasetIcon from './icons/DatasetIcon.vue'
 import { message } from 'ant-design-vue'
+import UserInfo from './userInfo.vue'
 
 const router = useRouter()
 const route = useRoute()
@@ -88,6 +93,7 @@ const handleMenuClick = ({ key }: { key: string }) => {
 }
 
 .layout-sider {
+  position: relative;
   background: #fcfcfd;
   border-right: 1px solid rgba(6, 10, 38, 0.03);
   overflow-y: auto;
@@ -134,5 +140,11 @@ const handleMenuClick = ({ key }: { key: string }) => {
     align-items: flex-start;
     padding: 24px;
   }
+}
+
+.user-info-box {
+  position: absolute;
+  left: 10px;
+  bottom: 10px;
 }
 </style>
