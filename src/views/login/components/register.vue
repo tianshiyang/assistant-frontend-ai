@@ -226,7 +226,6 @@ const handleUpload: UploadProps['customRequest'] = async options => {
     })
 
     // 上传成功，更新头像地址
-    console.log(result)
     registerFormData.avatar_url = result.url
     message.success('头像上传成功！')
 

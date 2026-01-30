@@ -5,7 +5,7 @@ export const homeRouter = [
     component: () => import('@/components/layout.vue'),
     children: [
       {
-        path: '/chat',
+        path: '/chat/:conversation_id?',
         name: 'chat',
         component: () => import('@/views/chat/index.vue'),
       },

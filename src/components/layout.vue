@@ -34,9 +34,7 @@
       </div>
     </a-layout-sider>
     <a-layout-content class="layout-content">
-      <div class="content-wrapper">
-        <router-view />
-      </div>
+      <router-view />
     </a-layout-content>
   </a-layout>
 </template>
@@ -133,13 +131,7 @@ const handleMenuClick = ({ key }: { key: string }) => {
   background-color: #fff;
   overflow-y: auto;
   overflow-x: hidden;
-
-  .content-wrapper {
-    min-height: 100%;
-    display: flex;
-    align-items: flex-start;
-    padding: 24px;
-  }
+  padding: 24px;
 }
 
 .user-info-box {
