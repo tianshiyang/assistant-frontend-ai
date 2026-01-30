@@ -8,7 +8,7 @@
         <div class="ai-answer">
           <div v-for="(item, index) in message.messages" :key="index">
             <div v-if="item.type === ChatResponseType.GENERATE">
-              {{ item.content }}
+              <MdPreview :model-value="item.content" />
             </div>
             <div v-else-if="item.type === ChatResponseType.TOOL">
               AI准备调用工具：{{ item.tool_call }}
@@ -39,6 +39,8 @@
 import type { ConversationHistory } from '@/api/types/ai'
 import { ChatResponseType, type Skill } from '@/api/types/public'
 import SendMessage from './sendMessage.vue'
+import { MdPreview } from 'md-editor-v3'
+import 'md-editor-v3/lib/preview.css'
 
 defineProps({
   messages: {

@@ -16,6 +16,7 @@
     "axios": "^1.13.2",
     "cos-js-sdk-v5": "^1.5.15",
     "lodash": "^4.17.21",
+    "md-editor-v3": "^6.3.1",
     "pinia": "^3.0.4",
     "unplugin-auto-import": "^20.3.0",
     "vue": "^3.5.24",
