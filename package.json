@@ -11,6 +11,7 @@
     "format": "prettier --write src/"
   },
   "dependencies": {
+    "@microsoft/fetch-event-source": "^2.0.1",
     "ant-design-vue": "^4.2.6",
     "axios": "^1.13.2",
     "cos-js-sdk-v5": "^1.5.15",
