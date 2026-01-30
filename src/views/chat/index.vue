@@ -14,6 +14,7 @@ import { ChatResponseType, type Skill } from '@/api/types/public'
 import { chatAPI, getConversationHistoryAPI } from '@/api/module/ai'
 import type { ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
+import { margeAiMessage } from './utils/margeAiMessage'
 
 const route = useRoute()
 const router = useRouter()
@@ -29,7 +30,7 @@ const handleSend = (payload: { question: string; skills?: Skill[] }) => {
   const data = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
-    // dataset_ids: payload.dataset_ids,
+    dataset_ids: ['2fb02169-29f9-4ffc-91a4-49f7ef4eb39e'],
     skills: payload.skills,
   }
   chatAPI(data, {
@@ -53,7 +54,7 @@ const initGetHistory = async () => {
   const res = await getConversationHistoryAPI({
     conversation_id: conversation_id.value as string,
   })
-  conversationHistory.value = res
+  conversationHistory.value = margeAiMessage(res)
 }
 
 // 初始化参数

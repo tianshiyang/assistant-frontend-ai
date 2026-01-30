@@ -6,5 +6,10 @@ export interface ConversationHistory {
   conversation_id: string
   question: string
   messages: StreamResponse[]
+  answer: string
+  input_tokens: number
+  output_tokens: number
+  total_tokens: number
   created_at: string
+  updated_at: string
 }
