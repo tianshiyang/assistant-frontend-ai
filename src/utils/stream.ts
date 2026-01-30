@@ -1,7 +1,9 @@
-import { fetchEventSource, type EventSourceMessage } from '@microsoft/fetch-event-source'
+import { fetchEventSource } from '@microsoft/fetch-event-source'
 import { getToken } from './storage'
+import { message } from 'ant-design-vue'
+import type { StreamResponse } from '@/api/types'
 
-export const streamRequest = ({
+export const streamRequest = <T = StreamResponse>({
   url,
   method,
   headers,
@@ -16,7 +18,7 @@ export const streamRequest = ({
   headers?: Record<string, string>
   data: any
   onopen?: (response: Response) => void
-  onmessage?: (event: EventSourceMessage) => void
+  onmessage?: (event: T) => void
   onerror?: (error: Error) => void
   onclose?: () => void
 }) => {
@@ -42,20 +44,22 @@ export const streamRequest = ({
     },
     body: JSON.stringify(data),
     onopen: async response => {
-      onopen?.(response)
-      console.log('SSE连接已建立', response)
+      if (response.status !== 200) {
+        message.error('SSE连接失败')
+      } else if (response.ok) {
+        onopen?.(response)
+      }
+      console.log('SSE连接已建立')
     },
     onmessage: event => {
-      onmessage?.(event)
-      console.log('SSE消息', event)
+      onmessage?.(JSON.parse(event.data))
     },
     onerror: error => {
+      message.error(error)
       onerror?.(error)
-      console.error('SSE连接错误', error)
     },
     onclose: () => {
       onclose?.()
-      console.log('SSE连接关闭')
     },
   })
   return {

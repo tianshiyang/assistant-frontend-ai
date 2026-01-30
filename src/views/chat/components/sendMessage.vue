@@ -4,7 +4,7 @@
       <a-textarea
         v-model:value="selectConfig.question"
         placeholder="向AI助手提问"
-        :auto-size="{ minRows: 3, maxRows: 6 }"
+        :auto-size="{ minRows, maxRows }"
         :bordered="false"
         class="input-area"
       />
@@ -40,6 +40,17 @@ import { ref } from 'vue'
 import { ArrowUpOutlined } from '@ant-design/icons-vue'
 import { getSkillsDictAPI } from '@/api/module/public'
 import type { Skill, SkillItem } from '@/api/types/public'
+
+defineProps({
+  minRows: {
+    type: Number,
+    default: 3,
+  },
+  maxRows: {
+    type: Number,
+    default: 3,
+  },
+})
 
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[] }]
@@ -82,7 +93,6 @@ getSkillsDict()
   border: 1px solid #e5e7eb;
   border-radius: 28px;
   background: #fff;
-  overflow: hidden;
 }
 
 .input-wrap {
@@ -140,6 +150,7 @@ getSkillsDict()
 
 .icon-wrap,
 .attach-wrap {
+  overflow: auto;
   display: inline-flex;
   align-items: center;
   color: #9ca3af;

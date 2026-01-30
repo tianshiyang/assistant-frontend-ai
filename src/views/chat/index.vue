@@ -2,24 +2,30 @@
   <template v-if="!conversation_id">
     <NewChat @send="handleSend" />
   </template>
+  <template v-else>
+    <ChatView :messages="conversationHistory" />
+  </template>
 </template>
 
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import NewChat from './components/newChat.vue'
-import type { Skill } from '@/api/types/public'
-import { chatAPI } from '@/api/module/ai'
+import { ChatResponseType, type Skill } from '@/api/types/public'
+import { chatAPI, getConversationHistoryAPI } from '@/api/module/ai'
+import type { ConversationHistory } from '@/api/types/ai'
+import ChatView from './components/chatView.vue'
 
 const route = useRoute()
 const router = useRouter()
 
 // 会话id
-const conversation_id = computed(() => {
-  return route.params.dataset_id
-})
+const conversation_id = ref<string>()
 
+// 会话历史记录
+const conversationHistory = ref<ConversationHistory[]>([])
+
+// 发送问题
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
-  console.log(payload)
   const data = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
@@ -28,16 +34,36 @@ const handleSend = (payload: { question: string; skills?: Skill[] }) => {
   }
   chatAPI(data, {
     onmessage: event => {
-      console.log(event)
-    },
-    onerror: error => {
-      console.log(error)
-    },
-    onclose: () => {
-      console.log('close')
+      if (event.type === ChatResponseType.CREATE_CONVERSATION) {
+        // 创建会话
+        router.push({
+          name: 'chat',
+          params: {
+            conversation_id: event.content,
+          },
+        })
+      }
     },
   })
 }
+
+// 初始化获取历史记录
+const initGetHistory = async () => {
+  if (!conversation_id.value) return
+  const res = await getConversationHistoryAPI({
+    conversation_id: conversation_id.value as string,
+  })
+  conversationHistory.value = res
+}
+
+// 初始化参数
+const initParams = () => {
+  conversation_id.value = route.params.conversation_id as string
+}
+
+// 初始化
+initParams()
+initGetHistory()
 </script>
 
 <style scoped lang="scss"></style>

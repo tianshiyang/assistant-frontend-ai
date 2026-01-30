@@ -1,7 +1,19 @@
 import { streamRequest } from '@/utils/stream'
 import type { Skill } from '../types/public'
-import type { EventSourceMessage } from '@microsoft/fetch-event-source'
+import type { StreamResponse } from '../types'
+import { request } from '@/utils/request'
+import type { ConversationHistory } from '../types/ai'
 
+// 获取当前会话下的历史记录
+export const getConversationHistoryAPI = (params: { conversation_id: string }) => {
+  return request<ConversationHistory[]>({
+    url: '/api/ai/conversation/messages',
+    method: 'GET',
+    params,
+  })
+}
+
+// 与AI进行对话
 export const chatAPI = (
   data: {
     conversation_id: string
@@ -10,7 +22,7 @@ export const chatAPI = (
     skills?: Skill[]
   },
   options?: {
-    onmessage?: (event: EventSourceMessage) => void
+    onmessage?: (event: StreamResponse) => void
     onerror?: (error: Error) => void
     onclose?: () => void
   }
