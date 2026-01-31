@@ -19,6 +19,7 @@ declare module 'vue' {
     AEmpty: typeof import('ant-design-vue/es')['Empty']
     AForm: typeof import('ant-design-vue/es')['Form']
     AFormItem: typeof import('ant-design-vue/es')['FormItem']
+    AImage: typeof import('ant-design-vue/es')['Image']
     AInput: typeof import('ant-design-vue/es')['Input']
     AInputPassword: typeof import('ant-design-vue/es')['InputPassword']
     ALayout: typeof import('ant-design-vue/es')['Layout']
@@ -37,10 +38,12 @@ declare module 'vue' {
     ATextarea: typeof import('ant-design-vue/es')['Textarea']
     AUpload: typeof import('ant-design-vue/es')['Upload']
     ChatIcon: typeof import('./src/components/icons/ChatIcon.vue')['default']
+    ChooseDataset: typeof import('./src/components/skills/chooseDataset.vue')['default']
     DatasetIcon: typeof import('./src/components/icons/DatasetIcon.vue')['default']
     Layout: typeof import('./src/components/layout.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']
+    Skills: typeof import('./src/components/skills/index.vue')['default']
     UserInfo: typeof import('./src/components/userInfo.vue')['default']
   }
 }

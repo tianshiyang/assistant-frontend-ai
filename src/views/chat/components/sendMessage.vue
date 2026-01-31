@@ -33,11 +33,15 @@
       </div>
     </div>
   </div>
+
+  <!-- 选择知识库 -->
+  <ChooseDataset v-model="skillModelData.chooseDatasetModel" @ok="handleChooseDataset" />
 </template>
 
 <script setup lang="ts">
 import { ArrowUpOutlined } from '@ant-design/icons-vue'
 import { Skill, SKILL_LABEL, type SkillItem } from '@/api/types/public'
+import ChooseDataset from '@/components/skills/chooseDataset.vue'
 
 defineProps({
   minRows: {
@@ -51,7 +55,7 @@ defineProps({
 })
 
 const emit = defineEmits<{
-  send: [payload: { question: string; skills?: Skill[] }]
+  send: [payload: { question: string; skills?: Skill[]; datasetIds?: string[] }]
 }>()
 
 // 选择的配置信息
@@ -64,21 +68,36 @@ const skillList: SkillItem[] = [
   { label: SKILL_LABEL[Skill.DATASET_RETRIEVER], value: Skill.DATASET_RETRIEVER },
 ]
 
+const skillModelData = ref({
+  chooseDatasetModel: false,
+})
+
 // 选择技能
 const selectSkill = (item: SkillItem) => {
-  if (selectConfig.skills.includes(item.value)) {
-    selectConfig.skills = selectConfig.skills.filter(s => s !== item.value)
-  } else {
-    selectConfig.skills.push(item.value)
+  if (item.value === Skill.DATASET_RETRIEVER) {
+    // 选择知识库
+    skillModelData.value.chooseDatasetModel = true
+    return
   }
 }
+
+// 选择知识库
+const handleChooseDataset = (value: string[]) => {
+  selectConfig.skills.push(Skill.DATASET_RETRIEVER)
+  skillsParams.datasetIds = value
+}
+
+// 选择技能的参数
+const skillsParams = reactive({
+  datasetIds: [] as string[],
+})
 
 const handleSend = () => {
   const question = selectConfig.question.trim()
   const skills = selectConfig.skills
   selectConfig.question = ''
   selectConfig.skills = []
-  emit('send', { question, skills })
+  emit('send', { question, skills, datasetIds: skillsParams.datasetIds })
 }
 </script>
 

@@ -27,11 +27,11 @@ const conversation_id = ref<string>(route.params.conversation_id as string)
 const conversationHistory = ref<ConversationHistory[]>([])
 
 // 发送问题
-const handleSend = (payload: { question: string; skills?: Skill[] }) => {
+const handleSend = (payload: { question: string; skills?: Skill[]; datasetIds?: string[] }) => {
   const data = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
-    dataset_ids: ['2fb02169-29f9-4ffc-91a4-49f7ef4eb39e'],
+    dataset_ids: payload.datasetIds,
     skills: payload.skills,
   }
   conversationHistory.value.push({
@@ -62,6 +62,7 @@ const handleSend = (payload: { question: string; skills?: Skill[] }) => {
         lastMessage.conversation_id = event.content
       } else if (
         [
+          ChatResponseType.PING,
           ChatResponseType.SAVE_TOKEN,
           ChatResponseType.TOOL,
           ChatResponseType.TOOL_RESULT,

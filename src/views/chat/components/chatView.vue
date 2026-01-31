@@ -7,6 +7,12 @@
         </div>
         <div class="ai-answer">
           <div v-for="(item, index) in message.messages" :key="index">
+            <div
+              v-if="item.type === ChatResponseType.PING && index === message.messages.length - 1"
+            >
+              <!-- 最后一条消息展示loading动画 -->
+              <img class="loading-ai-output" src="@/assets/images/loading-agent.gif" alt="加载中" />
+            </div>
             <div v-if="item.type === ChatResponseType.GENERATE">
               <MdPreview :model-value="item.content" />
             </div>
@@ -112,6 +118,11 @@ watch(
         white-space: pre-wrap;
         word-wrap: break-word;
         padding: 10px 16px;
+        .loading-ai-output {
+          width: 32px;
+          height: 32px;
+          margin-bottom: 10px;
+        }
         .message-info {
           width: fit-content;
           background-color: rgba(6, 10, 38, 0.06);

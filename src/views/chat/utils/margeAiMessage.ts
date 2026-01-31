@@ -9,6 +9,7 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
   aiMessage.messages.forEach(messageChunk => {
     if (
       [
+        ChatResponseType.PING,
         ChatResponseType.DONE,
         ChatResponseType.ERROR,
         ChatResponseType.SAVE_TOKEN,
