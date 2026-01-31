@@ -2,7 +2,7 @@ import { streamRequest } from '@/utils/stream'
 import type { Skill } from '../types/public'
 import type { StreamResponse } from '../types'
 import { request } from '@/utils/request'
-import type { ConversationHistory } from '../types/ai'
+import type { ConversationHistory, ConversationList } from '../types/ai'
 
 // 获取当前会话下的历史记录
 export const getConversationHistoryAPI = (params: { conversation_id: string }) => {
@@ -34,5 +34,13 @@ export const chatAPI = (
     onmessage: options?.onmessage,
     onerror: options?.onerror,
     onclose: options?.onclose,
+  })
+}
+
+// 获取所有会话列表
+export const getAllConversationListAPI = () => {
+  return request<ConversationList[]>({
+    url: '/api/ai/conversation/all',
+    method: 'GET',
   })
 }

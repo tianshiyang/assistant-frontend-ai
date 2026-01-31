@@ -13,3 +13,12 @@ export interface ConversationHistory {
   created_at: string
   updated_at: string
 }
+
+// 会话列表
+export interface ConversationList {
+  id: string
+  name: string
+  user_id: string
+  created_at: string
+  updated_at: string
+}

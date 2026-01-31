@@ -92,6 +92,7 @@ watch(
   () => route.params.conversation_id,
   () => {
     conversation_id.value = route.params.conversation_id as string
+    initGetHistory()
   }
 )
 </script>
