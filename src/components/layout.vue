@@ -29,8 +29,22 @@
         </a-menu-item-group>
 
         <a-menu-item-group title="最近对话" class="conversation-list">
-          <a-menu-item v-for="item in conversationList" :key="'/chat/' + item.id">
-            <span>{{ item.name }}</span>
+          <a-menu-item
+            v-for="item in conversationList"
+            :key="'/chat/' + item.id"
+            @mouseenter="item.isHover = true"
+            @mouseleave="item.isHover = false"
+          >
+            <div class="conversation-item-box">
+              <div class="conversation-name">{{ item.name }}</div>
+              <div
+                v-if="item.isHover"
+                class="conversation-icon"
+                @click="handleDeleteConversation(item)"
+              >
+                <DeleteOutlined />
+              </div>
+            </div>
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
@@ -46,21 +60,26 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { createVNode, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import ChatIcon from './icons/ChatIcon.vue'
 import DatasetIcon from './icons/DatasetIcon.vue'
-import { message } from 'ant-design-vue'
+import { message, Modal } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
-import { getAllConversationListAPI } from '@/api/module/ai'
+import { deleteConversationAPI, getAllConversationListAPI } from '@/api/module/ai'
 import type { ConversationList } from '@/api/types/ai'
+import { DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+
+interface ConversationItem extends ConversationList {
+  isHover: boolean
+}
 
 const router = useRouter()
 const route = useRoute()
 
 const selectedKeys = ref<string[]>([])
 
-const conversationList = ref<ConversationList[]>([])
+const conversationList = ref<ConversationItem[]>([])
 
 // 根据当前路由设置选中的菜单项
 const updateSelectedKeys = () => {
@@ -71,7 +90,12 @@ const updateSelectedKeys = () => {
 // 获取历史会话
 const getAllConversationList = async () => {
   const res = await getAllConversationListAPI()
-  conversationList.value = res
+  conversationList.value = res.map(item => {
+    return {
+      ...item,
+      isHover: false,
+    }
+  })
 }
 
 // 菜单点击处理
@@ -81,6 +105,29 @@ const handleMenuClick = ({ key }: { key: string }) => {
     return
   }
   router.push(key)
+}
+
+// 删除会话
+const handleDeleteConversation = (item: ConversationItem) => {
+  Modal.confirm({
+    content: `确定要删除会话 ${item.name} 吗？`,
+    icon: createVNode(ExclamationCircleOutlined),
+    onOk: async () => {
+      await deleteConversationAPI({ conversation_id: item.id })
+      await getAllConversationList()
+      router.push({
+        name: 'chat',
+        params: {
+          conversation_id: conversationList.value[0]?.id,
+        },
+      })
+      message.success('删除会话成功')
+    },
+    cancelText: '取消',
+    onCancel() {
+      Modal.destroyAll()
+    },
+  })
 }
 
 // 初始化
@@ -134,6 +181,22 @@ getAllConversationList()
   .layout-menu {
     height: 100%;
     border-right: none;
+
+    .conversation-item-box {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      .conversation-name {
+        font-size: 14px;
+        font-weight: 500;
+      }
+      .conversation-icon {
+        cursor: pointer;
+        :hover {
+          fill: #1890ff;
+        }
+      }
+    }
 
     .conversation-list {
       max-height: 300px;

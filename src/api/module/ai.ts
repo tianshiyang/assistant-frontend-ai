@@ -44,3 +44,12 @@ export const getAllConversationListAPI = () => {
     method: 'GET',
   })
 }
+
+// 删除会话
+export const deleteConversationAPI = (data: { conversation_id: string }) => {
+  return request({
+    url: '/api/ai/conversation/delete',
+    method: 'POST',
+    data,
+  })
+}
