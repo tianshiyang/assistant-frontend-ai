@@ -3,7 +3,7 @@
     <NewChat @send="handleSend" />
   </template>
   <template v-else>
-    <ChatView :messages="conversationHistory" />
+    <ChatView :messages="conversationHistory" @send="handleSend" />
   </template>
 </template>
 
@@ -15,12 +15,13 @@ import { chatAPI, getConversationHistoryAPI } from '@/api/module/ai'
 import type { ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
 import { margeAiMessage } from './utils/margeAiMessage'
+import dayjs from 'dayjs'
 
 const route = useRoute()
 const router = useRouter()
 
 // 会话id
-const conversation_id = ref<string>()
+const conversation_id = ref<string>(route.params.conversation_id as string)
 
 // 会话历史记录
 const conversationHistory = ref<ConversationHistory[]>([])
@@ -33,6 +34,18 @@ const handleSend = (payload: { question: string; skills?: Skill[] }) => {
     dataset_ids: ['2fb02169-29f9-4ffc-91a4-49f7ef4eb39e'],
     skills: payload.skills,
   }
+  conversationHistory.value.push({
+    conversation_id: '',
+    id: '',
+    question: payload.question,
+    messages: [],
+    answer: '',
+    input_tokens: 0,
+    output_tokens: 0,
+    total_tokens: 0,
+    created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+    updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
+  })
   chatAPI(data, {
     onmessage: event => {
       if (event.type === ChatResponseType.CREATE_CONVERSATION) {
@@ -43,6 +56,23 @@ const handleSend = (payload: { question: string; skills?: Skill[] }) => {
             conversation_id: event.content,
           },
         })
+        const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
+        lastMessage.conversation_id = event.content
+        lastMessage.id = event.message_id
+        lastMessage.conversation_id = event.content
+      } else if (
+        [
+          ChatResponseType.SAVE_TOKEN,
+          ChatResponseType.TOOL,
+          ChatResponseType.TOOL_RESULT,
+          ChatResponseType.DONE,
+          ChatResponseType.ERROR,
+          ChatResponseType.GENERATE,
+        ].includes(event.type)
+      ) {
+        const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
+        lastMessage.messages.push(event)
+        conversationHistory.value = margeAiMessage(conversationHistory.value)
       }
     },
   })
@@ -57,14 +87,13 @@ const initGetHistory = async () => {
   conversationHistory.value = margeAiMessage(res)
 }
 
-// 初始化参数
-const initParams = () => {
-  conversation_id.value = route.params.conversation_id as string
-}
-
-// 初始化
-initParams()
 initGetHistory()
+watch(
+  () => route.params.conversation_id,
+  () => {
+    conversation_id.value = route.params.conversation_id as string
+  }
+)
 </script>
 
 <style scoped lang="scss"></style>

@@ -2,7 +2,7 @@ import type { StreamResponse } from '@/api/types'
 import type { ConversationHistory } from '@/api/types/ai'
 import { ChatResponseType } from '@/api/types/public'
 
-const transformMessageItem = (aiMessage: ConversationHistory) => {
+export const transformMessageItem = (aiMessage: ConversationHistory) => {
   // 格式化每个消息中的ai返回的message
   const messages: StreamResponse[] = []
   // AI输出内容文本

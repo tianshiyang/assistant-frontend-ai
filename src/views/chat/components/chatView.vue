@@ -1,6 +1,6 @@
 <template>
   <div class="chat-view">
-    <div class="messages-box">
+    <div ref="messagesBoxRef" class="messages-box">
       <div v-for="message in messages" :key="message.id" class="message-item">
         <div class="user-question">
           {{ message.question }}
@@ -42,16 +42,37 @@ import SendMessage from './sendMessage.vue'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 
-defineProps({
+const props = defineProps({
   messages: {
     type: Array as PropType<ConversationHistory[]>,
     required: true,
   },
 })
 
+const emit = defineEmits<{
+  send: [payload: { question: string; skills?: Skill[] }]
+}>()
+
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
-  console.log(payload)
+  emit('send', payload)
 }
+
+const messagesBoxRef = useTemplateRef<HTMLDivElement>('messagesBoxRef')
+
+const scrollToBottom = () => {
+  nextTick(() => {
+    const el = messagesBoxRef.value
+    if (el) {
+      el.scrollTo({ top: el.scrollHeight, behavior: 'smooth' })
+    }
+  })
+}
+
+watch(
+  () => props.messages,
+  () => scrollToBottom(),
+  { deep: true }
+)
 </script>
 
 <style scoped lang="scss">

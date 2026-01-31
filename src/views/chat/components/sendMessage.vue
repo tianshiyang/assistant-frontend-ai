@@ -36,10 +36,8 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
 import { ArrowUpOutlined } from '@ant-design/icons-vue'
-import { getSkillsDictAPI } from '@/api/module/public'
-import type { Skill, SkillItem } from '@/api/types/public'
+import { Skill, SKILL_LABEL, type SkillItem } from '@/api/types/public'
 
 defineProps({
   minRows: {
@@ -62,7 +60,9 @@ const selectConfig = reactive({
   skills: [] as Skill[],
 })
 
-const skillList = ref<SkillItem[]>([])
+const skillList: SkillItem[] = [
+  { label: SKILL_LABEL[Skill.DATASET_RETRIEVER], value: Skill.DATASET_RETRIEVER },
+]
 
 // 选择技能
 const selectSkill = (item: SkillItem) => {
@@ -74,17 +74,12 @@ const selectSkill = (item: SkillItem) => {
 }
 
 const handleSend = () => {
-  emit('send', { question: selectConfig.question, skills: selectConfig.skills })
+  const question = selectConfig.question.trim()
+  const skills = selectConfig.skills
+  selectConfig.question = ''
+  selectConfig.skills = []
+  emit('send', { question, skills })
 }
-
-// 获取技能列表
-const getSkillsDict = async () => {
-  const res = await getSkillsDictAPI()
-  skillList.value = res
-}
-
-// 初始化
-getSkillsDict()
 </script>
 
 <style scoped lang="scss">

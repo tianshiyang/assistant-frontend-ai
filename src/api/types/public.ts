@@ -9,7 +9,7 @@ export const SKILL_LABEL = {
 } as const
 
 export interface SkillItem {
-  label: typeof SKILL_LABEL
+  label: (typeof SKILL_LABEL)[keyof typeof SKILL_LABEL]
   value: (typeof Skill)[keyof typeof Skill]
 }
 
