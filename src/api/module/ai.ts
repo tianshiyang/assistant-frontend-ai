@@ -62,3 +62,12 @@ export const updataConversationNameAPI = (params: { message_id: string }) => {
     params,
   })
 }
+
+// 获取用户可能询问的问题
+export const getUserPossibleQuestionsAPI = (data: { message_id: string }) => {
+  return request<{ question_list: string[] }>({
+    url: '/api/ai/conversation/user_maybe_question',
+    method: 'post',
+    data,
+  })
+}

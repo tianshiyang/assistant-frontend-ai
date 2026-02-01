@@ -3,7 +3,7 @@
     <NewChat @send="handleSend" />
   </template>
   <template v-else>
-    <ChatView :messages="conversationHistory" @send="handleSend" />
+    <ChatView :messages="conversationHistory" :questions="questions" @send="handleSend" />
   </template>
 </template>
 
@@ -11,7 +11,12 @@
 import { useRoute, useRouter } from 'vue-router'
 import NewChat from './components/newChat.vue'
 import { ChatResponseType, type Skill } from '@/api/types/public'
-import { chatAPI, getConversationHistoryAPI, updataConversationNameAPI } from '@/api/module/ai'
+import {
+  chatAPI,
+  getConversationHistoryAPI,
+  getUserPossibleQuestionsAPI,
+  updataConversationNameAPI,
+} from '@/api/module/ai'
 import type { ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
 import { margeAiMessage } from './utils/margeAiMessage'
@@ -27,11 +32,15 @@ const conversation_id = ref<string>(route.params.conversation_id as string)
 // 会话历史记录
 const conversationHistory = ref<ConversationHistory[]>([])
 
+// 用户可能询问的问题
+const questions = ref<string[]>([])
+
 // 发送问题
 const handleSend = (
   payload: { question: string; skills?: Skill[]; datasetIds?: string[] },
   newChat: boolean = false
 ) => {
+  questions.value = []
   const data = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
@@ -78,12 +87,20 @@ const handleSend = (
         const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
         lastMessage.messages.push(event)
         conversationHistory.value = margeAiMessage(conversationHistory.value)
-        if (event.type === ChatResponseType.DONE && newChat) {
-          // 新会话更新会话历史记录
-          await updataConversationNameAPI({
+        if (event.type === ChatResponseType.DONE) {
+          // 生成用户可能询问的问题
+          getUserPossibleQuestionsAPI({
             message_id: event.message_id,
+          }).then(res => {
+            questions.value = res.question_list
           })
-          emitter.emit('update-conversation-history')
+          if (newChat) {
+            // 新会话更新会话历史记录
+            await updataConversationNameAPI({
+              message_id: event.message_id,
+            })
+            emitter.emit('update-conversation-history')
+          }
         }
       }
     },

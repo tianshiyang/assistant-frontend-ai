@@ -37,7 +37,18 @@
           </div>
         </div>
       </div>
+      <div v-if="questions.length" class="questions-box">
+        <div
+          v-for="question in questions"
+          :key="question"
+          class="question-item"
+          @click="handleSend({ question, skills: currentSkills })"
+        >
+          {{ question }}
+        </div>
+      </div>
     </div>
+
     <div class="input-box">
       <SendMessage :min-rows="2" :max-rows="2" @send="handleSend" />
     </div>
@@ -56,13 +67,20 @@ const props = defineProps({
     type: Array as PropType<ConversationHistory[]>,
     required: true,
   },
+  questions: {
+    type: Array as PropType<string[]>,
+    default: () => [],
+  },
 })
 
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[] }]
 }>()
 
+const currentSkills = ref<Skill[]>([])
+
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
+  currentSkills.value = payload.skills || []
   emit('send', payload)
 }
 
@@ -79,6 +97,12 @@ const scrollToBottom = () => {
 
 watch(
   () => props.messages,
+  () => scrollToBottom(),
+  { deep: true }
+)
+
+watch(
+  () => props.questions,
   () => scrollToBottom(),
   { deep: true }
 )
@@ -122,7 +146,7 @@ watch(
       display: flex;
       flex-direction: column;
       align-items: stretch;
-      padding-bottom: 46px;
+      padding-bottom: 20px;
 
       .user-question {
         align-self: flex-end;
@@ -169,6 +193,24 @@ watch(
           color: #999;
         }
       }
+    }
+  }
+  .questions-box {
+    margin-left: 20px;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    .question-item {
+      cursor: pointer;
+      width: fit-content;
+      display: flex;
+      align-items: center;
+      border: 1px solid rgba(6, 10, 38, 0.06);
+      background-color: #fff;
+      font-size: 14px;
+      padding: 8px 16px;
+      border-radius: 16px;
     }
   }
   .input-box {
