@@ -13,14 +13,14 @@
               <!-- 最后一条消息展示loading动画 -->
               <img class="loading-ai-output" src="@/assets/images/loading-agent.gif" alt="加载中" />
             </div>
-            <div v-if="item.type === ChatResponseType.GENERATE">
+            <div v-if="item.type === ChatResponseType.GENERATE" style="margin-top: 10px">
               <MdPreview :model-value="item.content" />
             </div>
             <div v-else-if="item.type === ChatResponseType.TOOL">
               AI准备调用工具：{{ item.tool_call }}
             </div>
-            <div v-else-if="item.type === ChatResponseType.TOOL_RESULT">
-              <div class="message-info">工具返回结果：</div>
+            <div v-else-if="item.type === ChatResponseType.TOOL_RESULT" class="tool-result">
+              <div class="message-info" style="margin-bottom: 10px">工具返回结果：</div>
               <div class="message-info-item">
                 {{ item.content }}
               </div>
@@ -30,6 +30,9 @@
               <div class="message-info-item">input_tokens: {{ item.content.input_tokens }}</div>
               <div class="message-info-item">output_tokens: {{ item.content.output_tokens }}</div>
               <div class="message-info-item">total_tokens: {{ item.content.total_tokens }}</div>
+            </div>
+            <div v-else-if="item.type === ChatResponseType.ERROR">
+              {{ item.content }}
             </div>
           </div>
         </div>
@@ -82,6 +85,30 @@ watch(
 </script>
 
 <style scoped lang="scss">
+:deep(.md-editor-preview) {
+  p,
+  ul,
+  ol {
+    margin-top: 0;
+    margin-bottom: 0;
+  }
+  li {
+    margin: 0;
+    line-height: initial;
+  }
+  p:first-child {
+    margin-top: 0;
+  }
+  p:last-child {
+    margin-bottom: 0;
+  }
+  li:first-child {
+    margin-top: 0;
+  }
+  li:last-child {
+    margin-bottom: 0;
+  }
+}
 .chat-view {
   display: flex;
   flex-direction: column;
@@ -122,6 +149,11 @@ watch(
           width: 32px;
           height: 32px;
           margin-bottom: 10px;
+        }
+        .tool-result {
+          background-color: #f5f5f5;
+          padding: 10px 16px;
+          border-radius: 16px;
         }
         .message-info {
           width: fit-content;

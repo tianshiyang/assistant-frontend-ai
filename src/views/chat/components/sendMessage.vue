@@ -96,7 +96,6 @@ const handleSend = () => {
   const question = selectConfig.question.trim()
   const skills = selectConfig.skills
   selectConfig.question = ''
-  selectConfig.skills = []
   emit('send', { question, skills, datasetIds: skillsParams.datasetIds })
 }
 </script>
