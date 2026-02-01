@@ -6,7 +6,6 @@
     :closable="false"
     :mask-closable="false"
     :cancel-button-props="{ style: { display: 'none' } }"
-    :ok-button-props="{ disabled: !selectedRowKeys.length }"
     @ok="handleOk"
   >
     <!-- 知识库列表 -->

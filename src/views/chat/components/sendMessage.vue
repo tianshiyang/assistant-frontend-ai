@@ -83,8 +83,12 @@ const selectSkill = (item: SkillItem) => {
 
 // 选择知识库
 const handleChooseDataset = (value: string[]) => {
-  selectConfig.skills.push(Skill.DATASET_RETRIEVER)
   skillsParams.datasetIds = value
+  if (value.length) {
+    selectConfig.skills.push(Skill.DATASET_RETRIEVER)
+  } else {
+    selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.DATASET_RETRIEVER)
+  }
 }
 
 // 选择技能的参数
