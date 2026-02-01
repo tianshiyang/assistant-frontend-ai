@@ -13,4 +13,5 @@ export interface StreamResponse {
   updated_time: number
   content: any
   message_id: string
+  conversation_id: string
 }

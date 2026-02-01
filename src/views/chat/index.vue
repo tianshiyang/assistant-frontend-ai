@@ -66,7 +66,7 @@ const handleSend = (
         router.push({
           name: 'chat',
           params: {
-            conversation_id: event.content,
+            conversation_id: event.conversation_id,
           },
         })
         const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
