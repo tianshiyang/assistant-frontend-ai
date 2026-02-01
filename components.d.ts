@@ -35,6 +35,7 @@ declare module 'vue' {
     ATable: typeof import('ant-design-vue/es')['Table']
     ATag: typeof import('ant-design-vue/es')['Tag']
     ATextarea: typeof import('ant-design-vue/es')['Textarea']
+    ATooltip: typeof import('ant-design-vue/es')['Tooltip']
     AUpload: typeof import('ant-design-vue/es')['Upload']
     ChatIcon: typeof import('./src/components/icons/ChatIcon.vue')['default']
     ChooseDataset: typeof import('./src/components/skills/chooseDataset.vue')['default']

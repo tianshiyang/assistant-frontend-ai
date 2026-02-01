@@ -10,11 +10,11 @@ import SendMessage from './sendMessage.vue'
 import type { Skill } from '@/api/types/public'
 
 const emit = defineEmits<{
-  send: [payload: { question: string; skills?: Skill[] }]
+  send: [payload: { question: string; skills?: Skill[] }, newChat: boolean]
 }>()
 
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
-  emit('send', payload)
+  emit('send', payload, true)
 }
 </script>
 

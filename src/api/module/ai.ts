@@ -53,3 +53,12 @@ export const deleteConversationAPI = (data: { conversation_id: string }) => {
     data,
   })
 }
+
+// 更新会话名称
+export const updataConversationNameAPI = (params: { message_id: string }) => {
+  return request({
+    url: '/api/ai/conversation/update_conversation_title',
+    method: 'get',
+    params,
+  })
+}

@@ -36,7 +36,9 @@
             @mouseleave="item.isHover = false"
           >
             <div class="conversation-item-box">
-              <div class="conversation-name">{{ item.name }}</div>
+              <a-tooltip :title="item.name">
+                <div class="conversation-name">{{ item.name }}</div>
+              </a-tooltip>
               <div
                 v-if="item.isHover"
                 class="conversation-icon"
@@ -69,6 +71,7 @@ import UserInfo from './userInfo.vue'
 import { deleteConversationAPI, getAllConversationListAPI } from '@/api/module/ai'
 import type { ConversationList } from '@/api/types/ai'
 import { DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
+import emitter from '@/utils/eventBus'
 
 interface ConversationItem extends ConversationList {
   isHover: boolean
@@ -142,6 +145,9 @@ watch(
   { immediate: true }
 )
 
+// 监听更新会话历史记录
+emitter.on('update-conversation-history', getAllConversationList)
+
 getAllConversationList()
 </script>
 
@@ -189,6 +195,10 @@ getAllConversationList()
       .conversation-name {
         font-size: 14px;
         font-weight: 500;
+        max-width: 150px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
       .conversation-icon {
         cursor: pointer;

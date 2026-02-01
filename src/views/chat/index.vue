@@ -11,11 +11,12 @@
 import { useRoute, useRouter } from 'vue-router'
 import NewChat from './components/newChat.vue'
 import { ChatResponseType, type Skill } from '@/api/types/public'
-import { chatAPI, getConversationHistoryAPI } from '@/api/module/ai'
+import { chatAPI, getConversationHistoryAPI, updataConversationNameAPI } from '@/api/module/ai'
 import type { ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
 import { margeAiMessage } from './utils/margeAiMessage'
 import dayjs from 'dayjs'
+import emitter from '@/utils/eventBus'
 
 const route = useRoute()
 const router = useRouter()
@@ -27,7 +28,10 @@ const conversation_id = ref<string>(route.params.conversation_id as string)
 const conversationHistory = ref<ConversationHistory[]>([])
 
 // 发送问题
-const handleSend = (payload: { question: string; skills?: Skill[]; datasetIds?: string[] }) => {
+const handleSend = (
+  payload: { question: string; skills?: Skill[]; datasetIds?: string[] },
+  newChat: boolean = false
+) => {
   const data = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
@@ -47,7 +51,7 @@ const handleSend = (payload: { question: string; skills?: Skill[]; datasetIds?: 
     updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
   })
   chatAPI(data, {
-    onmessage: event => {
+    onmessage: async event => {
       if (event.type === ChatResponseType.CREATE_CONVERSATION) {
         // 创建会话
         router.push({
@@ -74,6 +78,13 @@ const handleSend = (payload: { question: string; skills?: Skill[]; datasetIds?: 
         const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
         lastMessage.messages.push(event)
         conversationHistory.value = margeAiMessage(conversationHistory.value)
+        if (event.type === ChatResponseType.DONE && newChat) {
+          // 新会话更新会话历史记录
+          await updataConversationNameAPI({
+            message_id: event.message_id,
+          })
+          emitter.emit('update-conversation-history')
+        }
       }
     },
   })

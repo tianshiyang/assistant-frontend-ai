@@ -58,10 +58,14 @@ export function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
         return resolve(result.data)
       })
       .catch((error: AxiosResponse<Response<T>>) => {
+        console.log(error)
         switch (error.status) {
           case 200:
             switch (error.data.code) {
               case ResponseCode.ERROR:
+                message.error(error.data.message)
+                return reject(error.data.message)
+              case ResponseCode.VALIDATE_ERROR:
                 message.error(error.data.message)
                 return reject(error.data.message)
               case ResponseCode.UNAUTHORIZED:
