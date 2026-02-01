@@ -224,7 +224,7 @@ getAllConversationList()
 }
 
 :deep(.ant-menu-item-group-list) {
-  max-height: 600px;
+  max-height: 400px;
   overflow-y: auto;
 }
 
