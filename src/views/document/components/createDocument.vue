@@ -82,9 +82,9 @@ const beforeUpload: UploadProps['beforeUpload'] = file => {
   }
 
   // 文件大小限制：50MB
-  const isLt50M = file.size / 1024 / 1024 < 50
+  const isLt50M = file.size / 1024 / 1024 / 1024 < 3
   if (!isLt50M) {
-    message.error('文件大小不能超过 50MB！')
+    message.error('文件大小不能超过 3k！')
     return false
   }
   return true
