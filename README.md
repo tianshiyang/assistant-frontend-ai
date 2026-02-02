@@ -5,7 +5,7 @@
 本项目采用前后端分离的技术架构，主要使用LangChain1.0进行编写，涵盖了多轮对话、历史记录、RAG检索能力等。并提供了会话管理、知识库管理、文档解析上传等功能
 
 1. 后端主要技术栈：**Python3** + **LangChain 1.0** + **Flask** + **PostgreSQL** + **Milvus**
-2. 前端主要技术栈：****Vue3** + **Ant Design Vue** + **Axios** + **SSE**
+2. 前端主要技术栈：****Vue3** + **TypeScript** +  **Ant Design Vue** + **Axios** + **SSE**
 
 
 ---
