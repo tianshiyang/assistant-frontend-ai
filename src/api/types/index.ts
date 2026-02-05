@@ -14,4 +14,5 @@ export interface StreamResponse {
   content: any
   message_id: string
   conversation_id: string
+  _is_expanded?: boolean
 }

@@ -16,6 +16,7 @@ export interface SkillItem {
 /** 聊天流式响应类型 */
 export enum ChatResponseType {
   PING = 'ping',
+  GET_TOOLS = 'get_tools',
   DONE = 'done',
   ERROR = 'error',
   TOOL = 'tool',
@@ -27,6 +28,7 @@ export enum ChatResponseType {
 
 export const CHAT_RESPONSE_TYPE_LABEL: Record<ChatResponseType, string> = {
   [ChatResponseType.PING]: '保持连通',
+  [ChatResponseType.GET_TOOLS]: '正在获取所有可用工具',
   [ChatResponseType.DONE]: '任务已完成',
   [ChatResponseType.ERROR]: '任务已失败',
   [ChatResponseType.TOOL]: '正在调用工具',

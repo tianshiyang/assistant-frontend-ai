@@ -16,14 +16,40 @@
             <div v-if="item.type === ChatResponseType.GENERATE" style="margin-top: 10px">
               <MdPreview :model-value="item.content" />
             </div>
-            <div v-else-if="item.type === ChatResponseType.TOOL">
+            <div v-else-if="item.type === ChatResponseType.GET_TOOLS" class="tool-node">
+              正在获取所有可用工具
+            </div>
+            <div v-else-if="item.type === ChatResponseType.TOOL" class="tool-node">
               AI准备调用工具：{{ item.tool_call }}
             </div>
             <div v-else-if="item.type === ChatResponseType.TOOL_RESULT" class="tool-result">
-              <div class="message-info" style="margin-bottom: 10px">工具返回结果：</div>
-              <div class="message-info-item">
-                {{ item.content }}
+              <div v-if="!item._is_expanded" class="expand-icon" @click="item._is_expanded = true">
+                <DownOutlined />
               </div>
+              <div v-else class="expand-icon" @click="item._is_expanded = false">
+                <UpOutlined />
+              </div>
+              <div class="message-info">工具执行结果：</div>
+
+              <template v-if="item._is_expanded">
+                <div class="message-info-item">
+                  <template v-if="JSON.parse(item.content).tool_process_type === 'search'">
+                    <div
+                      v-for="(searchItem, searchIndex) in JSON.parse(item.content)
+                        .tool_process_content"
+                      :key="searchIndex"
+                    >
+                      <div>{{ searchItem.content }}</div>
+                      <div class="search-item-source">
+                        <span>---- 参考来源：</span>
+                        <a-button type="link" @click="handleOpenSearchItem(searchItem.url)">
+                          {{ searchItem.title }}
+                        </a-button>
+                      </div>
+                    </div>
+                  </template>
+                </div>
+              </template>
             </div>
             <div v-else-if="item.type === ChatResponseType.SAVE_TOKEN">
               <div class="message-info">本次对话token消耗情况如下</div>
@@ -61,6 +87,7 @@ import { ChatResponseType, type Skill } from '@/api/types/public'
 import SendMessage from './sendMessage.vue'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
+import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
 
 const props = defineProps({
   messages: {
@@ -76,6 +103,10 @@ const props = defineProps({
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[] }]
 }>()
+
+const handleOpenSearchItem = (url: string) => {
+  window.open(url, '_blank')
+}
 
 const currentSkills = ref<Skill[]>([])
 
@@ -174,23 +205,58 @@ watch(
           height: 32px;
           margin-bottom: 10px;
         }
-        .tool-result {
+        .tool-node {
           background-color: #f5f5f5;
           padding: 10px 16px;
           border-radius: 16px;
+          margin-bottom: 20px;
+          width: fit-content;
+        }
+        .tool-result {
+          position: relative;
+          background-color: #f5f5f5;
+          padding: 10px 16px;
+          border-radius: 16px;
+          margin-bottom: 20px;
+          .expand-icon {
+            position: absolute;
+            right: 10px;
+            top: 10px;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+            cursor: pointer;
+            &:hover {
+              background-color: #e5e5e5;
+              color: #1677ff;
+            }
+          }
         }
         .message-info {
-          width: fit-content;
-          background-color: rgba(6, 10, 38, 0.06);
+          width: 100%;
           padding: 2px 8px;
           border-radius: 8px;
           font-size: 14px;
-          color: #999;
+          color: #333;
         }
         .message-info-item {
+          margin-top: 10px;
           margin-left: 20px;
           font-size: 14px;
           color: #999;
+          .search-item-source {
+            font-size: 14px;
+            font-weight: 500;
+            color: #333;
+            .ant-btn {
+              margin: 0;
+              padding: 0;
+            }
+            text-align: right;
+          }
         }
       }
     }
