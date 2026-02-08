@@ -18,6 +18,9 @@
           :type="selectConfig.skills.includes(item.value) ? 'primary' : 'default'"
           @click="selectSkill(item)"
         >
+          <template #icon>
+            <i :class="['skill-icon', 'iconfont', item.icon]"></i>
+          </template>
           <span class="skill-label">{{ item.label }}</span>
         </a-button>
       </div>
@@ -65,7 +68,16 @@ const selectConfig = reactive({
 })
 
 const skillList: SkillItem[] = [
-  { label: SKILL_LABEL[Skill.DATASET_RETRIEVER], value: Skill.DATASET_RETRIEVER },
+  {
+    label: SKILL_LABEL[Skill.DATASET_RETRIEVER],
+    value: Skill.DATASET_RETRIEVER,
+    icon: 'icon-aizhishiku',
+  }, // 知识库检索
+  {
+    label: SKILL_LABEL[Skill.WEB_SEARCH],
+    value: Skill.WEB_SEARCH,
+    icon: 'icon-aihulianwang',
+  }, // 网络搜索
 ]
 
 const skillModelData = ref({
@@ -78,6 +90,11 @@ const selectSkill = (item: SkillItem) => {
     // 选择知识库
     skillModelData.value.chooseDatasetModel = true
     return
+  } else if (item.value === Skill.WEB_SEARCH) {
+    // 选择网络搜索
+    selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.DATASET_RETRIEVER)
+    selectConfig.skills.push(Skill.WEB_SEARCH)
+    return
   }
 }
 
@@ -85,6 +102,7 @@ const selectSkill = (item: SkillItem) => {
 const handleChooseDataset = (value: string[]) => {
   skillsParams.datasetIds = value
   if (value.length) {
+    selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.WEB_SEARCH)
     selectConfig.skills.push(Skill.DATASET_RETRIEVER)
   } else {
     selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.DATASET_RETRIEVER)
@@ -143,11 +161,15 @@ const handleSend = () => {
   align-items: center;
   flex-wrap: wrap;
   gap: 4px;
+  .skill-icon {
+    margin-right: 4px;
+  }
 }
 
 .skill-btn {
   height: 32px;
   padding: 0 12px;
+  line-height: 31px;
 
   .skill-label {
     margin-right: 2px;

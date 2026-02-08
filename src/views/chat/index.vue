@@ -10,12 +10,13 @@
 <script setup lang="ts">
 import { useRoute, useRouter } from 'vue-router'
 import NewChat from './components/newChat.vue'
-import { ChatResponseType, type Skill } from '@/api/types/public'
+import { ChatResponseType, Skill } from '@/api/types/public'
 import {
   chatAPI,
   getConversationHistoryAPI,
   getUserPossibleQuestionsAPI,
   updataConversationNameAPI,
+  type ChatPayloadRequest,
 } from '@/api/module/ai'
 import type { ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
@@ -41,11 +42,13 @@ const handleSend = (
   newChat: boolean = false
 ) => {
   questions.value = []
-  const data = {
+  const data: ChatPayloadRequest = {
     conversation_id: <string>conversation_id.value,
     question: payload.question,
-    dataset_ids: payload.datasetIds,
     skills: payload.skills,
+  }
+  if (payload.skills?.includes(Skill.DATASET_RETRIEVER)) {
+    data.dataset_ids = payload.datasetIds
   }
   conversationHistory.value.push({
     conversation_id: '',

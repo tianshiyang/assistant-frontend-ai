@@ -1,0 +1,30 @@
+{
+  "id": "5125125",
+  "name": "assistant-ai",
+  "font_family": "iconfont",
+  "css_prefix_text": "icon-ai",
+  "description": "",
+  "glyphs": [
+    {
+      "icon_id": "3876823",
+      "name": "深度学习",
+      "font_class": "shenduxuexi",
+      "unicode": "e606",
+      "unicode_decimal": 58886
+    },
+    {
+      "icon_id": "508244",
+      "name": "互联网",
+      "font_class": "hulianwang",
+      "unicode": "e609",
+      "unicode_decimal": 58889
+    },
+    {
+      "icon_id": "10232796",
+      "name": "知识库",
+      "font_class": "zhishiku",
+      "unicode": "e790",
+      "unicode_decimal": 59280
+    }
+  ]
+}

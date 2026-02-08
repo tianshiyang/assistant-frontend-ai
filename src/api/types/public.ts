@@ -1,16 +1,19 @@
 export enum Skill {
   DATASET_RETRIEVER = 'dataset_retriever',
-  TEXT_TO_SQL = 'text_to_sql',
+  WEB_SEARCH = 'web_search',
+  // TEXT_TO_SQL = 'text_to_sql',
 }
 
 export const SKILL_LABEL = {
   [Skill.DATASET_RETRIEVER]: '知识库检索',
-  [Skill.TEXT_TO_SQL]: '文本转SQL',
+  // [Skill.TEXT_TO_SQL]: '文本转SQL',
+  [Skill.WEB_SEARCH]: '网络搜索',
 } as const
 
 export interface SkillItem {
   label: (typeof SKILL_LABEL)[keyof typeof SKILL_LABEL]
   value: (typeof Skill)[keyof typeof Skill]
+  icon: string
 }
 
 /** 聊天流式响应类型 */

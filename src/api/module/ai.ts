@@ -13,14 +13,16 @@ export const getConversationHistoryAPI = (params: { conversation_id: string }) =
   })
 }
 
+export interface ChatPayloadRequest {
+  conversation_id: string
+  question: string
+  dataset_ids?: string[]
+  skills?: Skill[]
+}
+
 // 与AI进行对话
 export const chatAPI = (
-  data: {
-    conversation_id: string
-    question: string
-    dataset_ids?: string[]
-    skills?: Skill[]
-  },
+  data: ChatPayloadRequest,
   options?: {
     onmessage?: (event: StreamResponse) => void
     onerror?: (error: Error) => void
