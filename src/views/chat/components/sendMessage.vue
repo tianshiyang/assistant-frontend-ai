@@ -26,6 +26,7 @@
       </div>
       <div class="action-right">
         <a-button
+          v-if="!isConversationLoading"
           type="primary"
           class="send-btn"
           :disabled="!selectConfig.question?.trim()"
@@ -33,6 +34,9 @@
         >
           <ArrowUpOutlined />
         </a-button>
+        <el-button v-else type="primary" class="send-btn" @click="handleStopConversation">
+          <PauseOutlined />
+        </el-button>
       </div>
     </div>
   </div>
@@ -42,7 +46,7 @@
 </template>
 
 <script setup lang="ts">
-import { ArrowUpOutlined } from '@ant-design/icons-vue'
+import { ArrowUpOutlined, PauseOutlined } from '@ant-design/icons-vue'
 import { Skill, SKILL_LABEL, type SkillItem } from '@/api/types/public'
 import ChooseDataset from '@/components/skills/chooseDataset.vue'
 
@@ -55,10 +59,15 @@ defineProps({
     type: Number,
     default: 3,
   },
+  isConversationLoading: {
+    type: Boolean,
+    required: true,
+  },
 })
 
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[]; datasetIds?: string[] }]
+  stop: []
 }>()
 
 // 选择的配置信息
@@ -119,6 +128,10 @@ const handleSend = () => {
   const skills = selectConfig.skills
   selectConfig.question = ''
   emit('send', { question, skills, datasetIds: skillsParams.datasetIds })
+}
+
+const handleStopConversation = () => {
+  emit('stop')
 }
 </script>
 

@@ -39,6 +39,15 @@ export const chatAPI = (
   })
 }
 
+// 停止与AI对话
+export const stopChatAPI = (data: { conversation_id: string }) => {
+  return request({
+    url: '/api/ai/chat/stop',
+    method: 'POST',
+    data,
+  })
+}
+
 // 获取所有会话列表
 export const getAllConversationListAPI = () => {
   return request<ConversationList[]>({

@@ -1,7 +1,11 @@
 <template>
   <div class="new-chat-container">
     <h1>你好，我是AI助手</h1>
-    <SendMessage @send="handleSend" />
+    <SendMessage
+      :is-conversation-loading="isConversationLoading"
+      @send="handleSend"
+      @stop="handleStopConversation"
+    />
   </div>
 </template>
 
@@ -9,12 +13,24 @@
 import SendMessage from './sendMessage.vue'
 import type { Skill } from '@/api/types/public'
 
+defineProps({
+  isConversationLoading: {
+    type: Boolean,
+    default: false,
+  },
+})
+
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[] }, newChat: boolean]
+  stop: []
 }>()
 
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
   emit('send', payload, true)
+}
+
+const handleStopConversation = () => {
+  emit('stop')
 }
 </script>
 

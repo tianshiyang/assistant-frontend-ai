@@ -50,6 +50,9 @@
                 </div>
               </template>
             </div>
+            <div v-else-if="item.type === ChatResponseType.STOP" class="task-stop-node">
+              任务已停止
+            </div>
             <div v-else-if="item.type === ChatResponseType.SAVE_TOKEN">
               <div class="message-info">本次对话token消耗情况如下</div>
               <div class="message-info-item">input_tokens: {{ item.content.input_tokens }}</div>
@@ -75,7 +78,13 @@
     </div>
 
     <div class="input-box">
-      <SendMessage :min-rows="2" :max-rows="2" @send="handleSend" />
+      <SendMessage
+        :is-conversation-loading="isConversationLoading"
+        :min-rows="2"
+        :max-rows="2"
+        @send="handleSend"
+        @stop="handleStopConversation"
+      />
     </div>
   </div>
 </template>
@@ -97,10 +106,15 @@ const props = defineProps({
     type: Array as PropType<string[]>,
     default: () => [],
   },
+  isConversationLoading: {
+    type: Boolean,
+    default: false,
+  },
 })
 
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[] }]
+  stop: []
 }>()
 
 const handleOpenSearchItem = (url: string) => {
@@ -112,6 +126,10 @@ const currentSkills = ref<Skill[]>([])
 const handleSend = (payload: { question: string; skills?: Skill[] }) => {
   currentSkills.value = payload.skills || []
   emit('send', payload)
+}
+
+const handleStopConversation = () => {
+  emit('stop')
 }
 
 const messagesBoxRef = useTemplateRef<HTMLDivElement>('messagesBoxRef')
@@ -210,6 +228,16 @@ watch(
           border-radius: 16px;
           margin-bottom: 20px;
           width: fit-content;
+        }
+        .task-stop-node {
+          background-color: #f5f5f5;
+          padding: 2px 8px;
+          border-radius: 16px;
+          margin-bottom: 20px;
+          width: fit-content;
+          color: #ff4d4f;
+          font-size: 14px;
+          border: 1px solid #ff4d4f;
         }
         .tool-result {
           position: relative;

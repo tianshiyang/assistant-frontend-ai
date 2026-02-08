@@ -20,6 +20,7 @@ export interface SkillItem {
 export enum ChatResponseType {
   PING = 'ping',
   GET_TOOLS = 'get_tools',
+  STOP = 'stop',
   DONE = 'done',
   ERROR = 'error',
   TOOL = 'tool',
@@ -39,4 +40,5 @@ export const CHAT_RESPONSE_TYPE_LABEL: Record<ChatResponseType, string> = {
   [ChatResponseType.SAVE_TOKEN]: '正在保存Token',
   [ChatResponseType.GENERATE]: '正在生成内容',
   [ChatResponseType.CREATE_CONVERSATION]: '正在生成会话',
+  [ChatResponseType.STOP]: '任务已停止',
 }

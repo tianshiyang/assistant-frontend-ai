@@ -1,9 +1,19 @@
 <template>
   <template v-if="!conversation_id">
-    <NewChat @send="handleSend" />
+    <NewChat
+      :is-conversation-loading="isConversationLoading"
+      @send="handleSend"
+      @stop="handleStopConversation"
+    />
   </template>
   <template v-else>
-    <ChatView :messages="conversationHistory" :questions="questions" @send="handleSend" />
+    <ChatView
+      :is-conversation-loading="isConversationLoading"
+      :messages="conversationHistory"
+      :questions="questions"
+      @send="handleSend"
+      @stop="handleStopConversation"
+    />
   </template>
 </template>
 
@@ -15,6 +25,7 @@ import {
   chatAPI,
   getConversationHistoryAPI,
   getUserPossibleQuestionsAPI,
+  stopChatAPI,
   updataConversationNameAPI,
   type ChatPayloadRequest,
 } from '@/api/module/ai'
@@ -36,11 +47,23 @@ const conversationHistory = ref<ConversationHistory[]>([])
 // 用户可能询问的问题
 const questions = ref<string[]>([])
 
+// 是否正在与AI对话
+const isConversationLoading = ref(false)
+
+// 停止与AI对话
+const handleStopConversation = async () => {
+  await stopChatAPI({
+    conversation_id: conversation_id.value as string,
+  })
+  isConversationLoading.value = false
+}
+
 // 发送问题
 const handleSend = (
   payload: { question: string; skills?: Skill[]; datasetIds?: string[] },
   newChat: boolean = false
 ) => {
+  isConversationLoading.value = true
   questions.value = []
   const data: ChatPayloadRequest = {
     conversation_id: <string>conversation_id.value,
@@ -84,12 +107,20 @@ const handleSend = (
           ChatResponseType.TOOL_RESULT,
           ChatResponseType.DONE,
           ChatResponseType.ERROR,
+          ChatResponseType.STOP,
           ChatResponseType.GENERATE,
         ].includes(event.type)
       ) {
         const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
         lastMessage.messages.push(event)
         conversationHistory.value = margeAiMessage(conversationHistory.value)
+        if (
+          [ChatResponseType.DONE, ChatResponseType.STOP, ChatResponseType.ERROR].includes(
+            event.type
+          )
+        ) {
+          isConversationLoading.value = false
+        }
         if (event.type === ChatResponseType.DONE) {
           // 生成用户可能询问的问题
           getUserPossibleQuestionsAPI({

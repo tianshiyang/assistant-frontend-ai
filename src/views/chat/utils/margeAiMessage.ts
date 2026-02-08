@@ -28,6 +28,7 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
         ChatResponseType.ERROR,
         ChatResponseType.SAVE_TOKEN,
         ChatResponseType.TOOL,
+        ChatResponseType.STOP,
       ].includes(messageChunk.type)
     ) {
       // 直接存入即可，不需要处理
