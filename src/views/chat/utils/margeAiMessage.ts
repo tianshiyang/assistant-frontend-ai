@@ -7,14 +7,27 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
   const messages: StreamResponse[] = []
   // AI输出内容文本
   aiMessage.messages.forEach(messageChunk => {
-    if (
+    if (messageChunk.type === ChatResponseType.TOOL_RESULT) {
+      // 处理工具返回结果
+      messageChunk._is_expanded = true
+      if (typeof messageChunk.content === 'string') {
+        messageChunk.content = JSON.parse(messageChunk.content)
+      }
+      messages.push(messageChunk)
+    } else if (messageChunk.type === ChatResponseType.DONE) {
+      // 处理完成，折叠所有工具返回结果
+      messages.forEach(item => {
+        if (item.type === ChatResponseType.TOOL_RESULT) {
+          item._is_expanded = false
+        }
+      })
+      messages.push(messageChunk)
+    } else if (
       [
         ChatResponseType.PING,
-        ChatResponseType.DONE,
         ChatResponseType.ERROR,
         ChatResponseType.SAVE_TOKEN,
         ChatResponseType.TOOL,
-        ChatResponseType.TOOL_RESULT,
       ].includes(messageChunk.type)
     ) {
       // 直接存入即可，不需要处理

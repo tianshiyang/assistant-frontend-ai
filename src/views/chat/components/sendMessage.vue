@@ -77,7 +77,7 @@ const skillList: SkillItem[] = [
     label: SKILL_LABEL[Skill.WEB_SEARCH],
     value: Skill.WEB_SEARCH,
     icon: 'icon-aihulianwang',
-  }, // 网络搜索
+  }, // 联网搜索
 ]
 
 const skillModelData = ref({
@@ -91,7 +91,7 @@ const selectSkill = (item: SkillItem) => {
     skillModelData.value.chooseDatasetModel = true
     return
   } else if (item.value === Skill.WEB_SEARCH) {
-    // 选择网络搜索
+    // 选择联网搜索
     selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.DATASET_RETRIEVER)
     selectConfig.skills.push(Skill.WEB_SEARCH)
     return

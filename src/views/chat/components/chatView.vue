@@ -32,11 +32,10 @@
               <div class="message-info">工具执行结果：</div>
 
               <template v-if="item._is_expanded">
-                <div class="message-info-item">
-                  <template v-if="JSON.parse(item.content).tool_process_type === 'search'">
+                <div class="message-inf“o-item">
+                  <template v-if="item.content.tool_process_type === 'search'">
                     <div
-                      v-for="(searchItem, searchIndex) in JSON.parse(item.content)
-                        .tool_process_content"
+                      v-for="(searchItem, searchIndex) in item.content.tool_process_content"
                       :key="searchIndex"
                     >
                       <div>{{ searchItem.content }}</div>
