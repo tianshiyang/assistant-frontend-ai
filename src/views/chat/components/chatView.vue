@@ -23,10 +23,18 @@
               AI准备调用工具：{{ item.tool_call }}
             </div>
             <div v-else-if="item.type === ChatResponseType.TOOL_RESULT" class="tool-result">
-              <div v-if="!item._is_expanded" class="expand-icon" @click="item._is_expanded = true">
+              <div
+                v-show="!item._is_expanded"
+                class="expand-icon"
+                @click="item._is_expanded = true"
+              >
                 <DownOutlined />
               </div>
-              <div v-else class="expand-icon" @click="item._is_expanded = false">
+              <div
+                v-show="item._is_expanded"
+                class="expand-icon"
+                @click="item._is_expanded = false"
+              >
                 <UpOutlined />
               </div>
               <div class="message-info">工具执行结果：</div>
@@ -145,8 +153,10 @@ const scrollToBottom = () => {
 
 watch(
   () => props.messages,
-  () => scrollToBottom(),
-  { deep: true }
+  () => {
+    scrollToBottom()
+  }
+  // { deep: true }
 )
 
 watch(

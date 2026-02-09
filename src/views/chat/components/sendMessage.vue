@@ -34,9 +34,9 @@
         >
           <ArrowUpOutlined />
         </a-button>
-        <el-button v-else type="primary" class="send-btn" @click="handleStopConversation">
+        <a-button v-else type="primary" class="send-btn" @click="handleStopConversation">
           <PauseOutlined />
-        </el-button>
+        </a-button>
       </div>
     </div>
   </div>
