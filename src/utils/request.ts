@@ -12,7 +12,6 @@ enum ResponseCode {
 const api = axios.create({
   // 默认地址请求地址，可在 .env.** 文件中修改
   headers: {
-    Authorization: `Bearer ${getToken()}`,
     'Content-Type': 'application/json',
   },
 })
@@ -52,7 +51,7 @@ interface Response<T = unknown> {
 
 export function request<T = unknown>(config: AxiosRequestConfig): Promise<T> {
   return new Promise((resolve, reject) => {
-    api(config)
+    api({ ...config, headers: { Authorization: `Bearer ${getToken()}` } })
       .then((res: AxiosResponse<Response<T>>) => {
         const result = res.data
         return resolve(result.data)

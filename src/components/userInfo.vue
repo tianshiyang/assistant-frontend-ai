@@ -26,6 +26,9 @@
             <span class="info-value">{{ userInfo.created_at }}</span>
           </div>
         </div>
+        <div class="user-info-logout">
+          <a-button danger @click="handleLogout">退出登录</a-button>
+        </div>
       </div>
     </template>
     <a-avatar :src="avatarUrl" :size="32" class="user-avatar-trigger" @click.stop>
@@ -38,6 +41,10 @@
 import { ref } from 'vue'
 import { UserOutlined } from '@ant-design/icons-vue'
 import { getUserInfoAPI } from '@/api/module/account'
+import { removeToken } from '@/utils/storage'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 interface UserInfo {
   id?: string
@@ -61,6 +68,11 @@ const fetchUserInfo = async () => {
   userInfo.value = data as UserInfo
   avatarUrl.value = userInfo.value.avatar_url
   loading.value = false
+}
+
+const handleLogout = async () => {
+  removeToken()
+  router.push('/login')
 }
 
 fetchUserInfo()
@@ -151,6 +163,13 @@ fetchUserInfo()
         word-break: break-all;
       }
     }
+  }
+
+  .user-info-logout {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-top: 12px;
   }
 }
 </style>
