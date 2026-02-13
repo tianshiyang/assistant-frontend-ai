@@ -57,6 +57,8 @@ export const streamRequest = <T = StreamResponse>({
     onerror: error => {
       message.error(error)
       onerror?.(error)
+      // 返回 null 禁用自动重连
+      return null
     },
     onclose: () => {
       onclose?.()
