@@ -20,6 +20,7 @@ module.exports = {
   },
   plugins: ['@typescript-eslint', 'vue', 'prettier'],
   rules: {
+    'vue/prop-name-casing': 'off',
     'prettier/prettier': 'error',
     'vue/multi-word-component-names': 'off',
     '@typescript-eslint/no-explicit-any': 'off',

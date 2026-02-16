@@ -32,19 +32,30 @@
       >
         <template #bodyCell="{ column, record }">
           <template v-if="column.key === 'status'">
-            <a-tag :color="record.status === SalesStatus.ACTIVE ? 'green' : 'red'">{{
-              SalesStatusMap[record.status as SalesStatus]
-            }}</a-tag>
+            <a-tag :color="record.status === SalesStatus.ACTIVE ? 'green' : 'red'">
+              {{ SalesStatusMap[record.status as SalesStatus] }}
+            </a-tag>
+          </template>
+          <template v-if="column.key === 'edit'">
+            <a-button type="link" @click="handleEditSales(record)"> 编辑 </a-button>
           </template>
         </template>
       </a-table>
     </div>
   </div>
+
+  <CreateOrUpdateSalesModal
+    v-if="editSales.visible"
+    v-model="editSales.visible"
+    :sales_id="editSales.sales_id"
+    @success="fetchDatasetList"
+  />
 </template>
 
 <script lang="ts" setup>
 import { getSalesListAPI } from '@/api/module/backend/sales'
 import { SalesStatusMap, type SalesItem, SalesStatus } from '@/api/types/backend/sales'
+import CreateOrUpdateSalesModal from './components/CreateOrUpdateSalesModal.vue'
 
 const loading = ref(false)
 
@@ -85,6 +96,11 @@ const columns = [
     dataIndex: 'status',
     key: 'status',
   },
+  {
+    title: '操作',
+    dataIndex: 'edit',
+    key: 'edit',
+  },
 ]
 // 搜索
 const handleSearch = () => {
@@ -107,6 +123,17 @@ const fetchDatasetList = async () => {
   } finally {
     loading.value = false
   }
+}
+
+const editSales = reactive({
+  visible: false,
+  sales_id: '' as unknown as number,
+})
+
+// 编辑销售
+const handleEditSales = (sales: SalesItem) => {
+  editSales.visible = true
+  editSales.sales_id = sales.id
 }
 
 fetchDatasetList()

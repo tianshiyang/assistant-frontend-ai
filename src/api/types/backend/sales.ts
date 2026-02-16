@@ -9,10 +9,17 @@ export const SalesStatusMap = {
 } as const
 
 export interface SalesItem {
-  id: string
+  id: number
   name: string
   email: string
   phone: string
   sales_no: string
   status: SalesStatus
+}
+
+export interface UpdateSalesItem {
+  sales_id: number
+  name: string
+  email: string
+  phone: string
 }
