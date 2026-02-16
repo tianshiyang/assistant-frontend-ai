@@ -29,14 +29,22 @@
           total: tableDataList.total,
         }"
         @change="fetchDatasetList"
-      />
+      >
+        <template #bodyCell="{ column, record }">
+          <template v-if="column.key === 'status'">
+            <a-tag :color="record.status === SalesStatus.ACTIVE ? 'green' : 'red'">{{
+              SalesStatusMap[record.status as SalesStatus]
+            }}</a-tag>
+          </template>
+        </template>
+      </a-table>
     </div>
   </div>
 </template>
 
 <script lang="ts" setup>
 import { getSalesListAPI } from '@/api/module/backend/sales'
-import type { SalesItem } from '@/api/types/backend/sales'
+import { SalesStatusMap, type SalesItem, SalesStatus } from '@/api/types/backend/sales'
 
 const loading = ref(false)
 
@@ -71,6 +79,11 @@ const columns = [
     title: '销售手机号',
     dataIndex: 'phone',
     key: 'phone',
+  },
+  {
+    title: '销售状态',
+    dataIndex: 'status',
+    key: 'status',
   },
 ]
 // 搜索
