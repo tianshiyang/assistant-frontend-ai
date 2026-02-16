@@ -10,7 +10,7 @@ export const streamRequest = <T = StreamResponse>({
   data,
   onopen,
   onmessage,
-  onerror,
+  // onerror,
   onclose,
 }: {
   url: string
@@ -55,10 +55,8 @@ export const streamRequest = <T = StreamResponse>({
       onmessage?.(JSON.parse(event.data))
     },
     onerror: error => {
-      message.error(error)
-      onerror?.(error)
-      // 返回 null 禁用自动重连
-      return null
+      // 禁用自动重连
+      throw error
     },
     onclose: () => {
       onclose?.()
