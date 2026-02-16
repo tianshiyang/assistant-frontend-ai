@@ -3,14 +3,14 @@ import type { BaseListResponse } from '../types'
 import type {
   CreateDatasetParams,
   DatasetItem,
-  DatasetListParams,
+  BaseListParams,
   DeleteDatasetParams,
   GetDatasetDetailParams,
   UpdateDatasetParams,
 } from '../types/dataset'
 
 // 获取知识库列表
-export const getDatasetListAPI = (params: DatasetListParams) => {
+export const getDatasetListAPI = (params: BaseListParams) => {
   return request<BaseListResponse<DatasetItem>>({
     url: '/api/dataset/list',
     method: 'get',

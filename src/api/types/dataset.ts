@@ -16,7 +16,7 @@ export interface CreateDatasetParams {
 }
 
 // 获取知识库列表请求参数
-export interface DatasetListParams {
+export interface BaseListParams {
   name?: string
   page_no: number
   page_size: number

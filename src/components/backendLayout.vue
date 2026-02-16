@@ -1,56 +1,28 @@
 <template>
   <div class="change-system" @click="handleChangeSystem">
     <SwapOutlined />
-    <span>后台系统</span>
+    <span>AI助手</span>
   </div>
   <a-layout class="layout-container">
     <a-layout-sider :width="200" class="layout-sider">
       <div class="layout-sider-header">
         <img class="layout-sider-header-logo" src="@/assets/images/assistant.png" alt="logo" />
-        <div class="layout-sider-header-text">AI助手</div>
+        <div class="layout-sider-header-text">后台系统</div>
       </div>
       <a-menu
         v-model:selected-keys="selectedKeys"
-        mode="inline"
+        mode="vertical"
         theme="light"
+        :inline-collapsed="true"
         class="layout-menu"
         @click="handleMenuClick"
       >
-        <a-menu-item key="/chat">
-          <template #icon>
-            <ChatIcon class="svg-icon" />
-          </template>
-          <span>新对话</span>
-        </a-menu-item>
-
-        <a-menu-item-group title="常用功能">
-          <a-menu-item key="/dataset">
+        <a-menu-item-group title="销售管理">
+          <a-menu-item key="/backend/sales/list">
             <template #icon>
               <DatasetIcon class="svg-icon" />
             </template>
-            <span>我的知识库</span>
-          </a-menu-item>
-        </a-menu-item-group>
-
-        <a-menu-item-group title="最近对话" class="conversation-list">
-          <a-menu-item
-            v-for="item in conversationList"
-            :key="'/chat/' + item.id"
-            @mouseenter="item.isHover = true"
-            @mouseleave="item.isHover = false"
-          >
-            <div class="conversation-item-box">
-              <a-tooltip :title="item.name">
-                <div class="conversation-name">{{ item.name }}</div>
-              </a-tooltip>
-              <div
-                v-if="item.isHover"
-                class="conversation-icon"
-                @click="handleDeleteConversation(item)"
-              >
-                <DeleteOutlined />
-              </div>
-            </div>
+            <span>销售管理</span>
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
@@ -66,16 +38,15 @@
 </template>
 
 <script lang="ts" setup>
-import { createVNode, ref, watch } from 'vue'
+import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import ChatIcon from './icons/ChatIcon.vue'
 import DatasetIcon from './icons/DatasetIcon.vue'
-import { message, Modal } from 'ant-design-vue'
+import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
-import { deleteConversationAPI, getAllConversationListAPI } from '@/api/module/ai'
+import { getAllConversationListAPI } from '@/api/module/ai'
 import type { ConversationList } from '@/api/types/ai'
-import { DeleteOutlined, ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons-vue'
 import emitter from '@/utils/eventBus'
+import { SwapOutlined } from '@ant-design/icons-vue'
 
 interface ConversationItem extends ConversationList {
   isHover: boolean
@@ -83,13 +54,6 @@ interface ConversationItem extends ConversationList {
 
 const router = useRouter()
 const route = useRoute()
-
-// 切换到后台系统
-const handleChangeSystem = () => {
-  router.push({
-    path: '/backend/sales/list',
-  })
-}
 
 const selectedKeys = ref<string[]>([])
 
@@ -121,31 +85,15 @@ const handleMenuClick = ({ key }: { key: string }) => {
   router.push(key)
 }
 
-// 删除会话
-const handleDeleteConversation = (item: ConversationItem) => {
-  Modal.confirm({
-    content: `确定要删除会话 ${item.name} 吗？`,
-    icon: createVNode(ExclamationCircleOutlined),
-    onOk: async () => {
-      await deleteConversationAPI({ conversation_id: item.id })
-      await getAllConversationList()
-      router.push({
-        name: 'chat',
-        params: {
-          conversation_id: conversationList.value[0]?.id,
-        },
-      })
-      message.success('删除会话成功')
-    },
-    cancelText: '取消',
-    onCancel() {
-      Modal.destroyAll()
-    },
-  })
-}
-
 // 初始化
 updateSelectedKeys()
+
+// 切换到后台系统
+const handleChangeSystem = () => {
+  router.push({
+    path: '/chat',
+  })
+}
 
 // 监听路由变化，更新选中项
 watch(
@@ -251,6 +199,7 @@ getAllConversationList()
   left: 10px;
   bottom: 10px;
 }
+
 .change-system {
   position: absolute;
   top: 20px;
@@ -258,8 +207,8 @@ getAllConversationList()
   display: flex;
   align-items: center;
   gap: 8px;
-  font-size: 14px;
   cursor: pointer;
+  font-size: 14px;
   &:hover {
     color: #1890ff;
   }
