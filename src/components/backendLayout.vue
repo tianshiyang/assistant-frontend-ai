@@ -20,13 +20,13 @@
         <a-menu-item-group title="人员管理">
           <a-menu-item key="/backend/sales/list">
             <template #icon>
-              <DatasetIcon class="svg-icon" />
+              <UserOutlined />
             </template>
             <span>销售管理</span>
           </a-menu-item>
           <a-menu-item key="/backend/customer/list">
             <template #icon>
-              <DatasetIcon class="svg-icon" />
+              <TeamOutlined />
             </template>
             <span>客户管理</span>
           </a-menu-item>
@@ -46,7 +46,7 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import DatasetIcon from './icons/DatasetIcon.vue'
+import { UserOutlined, TeamOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
 import { getAllConversationListAPI } from '@/api/module/ai'
