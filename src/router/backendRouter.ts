@@ -9,6 +9,11 @@ export const backendRouter = [
         name: 'salesList',
         component: () => import('@/views/backend/sales/index.vue'),
       },
+      {
+        path: '/backend/customer/list',
+        name: 'customerList',
+        component: () => import('@/views/backend/customer/index.vue'),
+      },
     ],
   },
 ]

@@ -17,12 +17,18 @@
         class="layout-menu"
         @click="handleMenuClick"
       >
-        <a-menu-item-group title="销售管理">
+        <a-menu-item-group title="人员管理">
           <a-menu-item key="/backend/sales/list">
             <template #icon>
               <DatasetIcon class="svg-icon" />
             </template>
             <span>销售管理</span>
+          </a-menu-item>
+          <a-menu-item key="/backend/customer/list">
+            <template #icon>
+              <DatasetIcon class="svg-icon" />
+            </template>
+            <span>客户管理</span>
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
