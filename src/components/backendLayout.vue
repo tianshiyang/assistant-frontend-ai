@@ -35,7 +35,7 @@
         <a-menu-item-group title="商品管理">
           <a-menu-item key="/backend/product/category/list">
             <template #icon>
-              <UserOutlined />
+              <AppstoreOutlined />
             </template>
             <span>商品分类</span>
           </a-menu-item>
@@ -55,13 +55,12 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { UserOutlined, TeamOutlined } from '@ant-design/icons-vue'
+import { UserOutlined, TeamOutlined, AppstoreOutlined, SwapOutlined } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
 import { getAllConversationListAPI } from '@/api/module/ai'
 import type { ConversationList } from '@/api/types/ai'
 import emitter from '@/utils/eventBus'
-import { SwapOutlined } from '@ant-design/icons-vue'
 
 interface ConversationItem extends ConversationList {
   isHover: boolean
