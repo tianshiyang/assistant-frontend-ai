@@ -31,6 +31,15 @@
             <span>客户管理</span>
           </a-menu-item>
         </a-menu-item-group>
+
+        <a-menu-item-group title="商品管理">
+          <a-menu-item key="/backend/product/category/list">
+            <template #icon>
+              <UserOutlined />
+            </template>
+            <span>商品分类</span>
+          </a-menu-item>
+        </a-menu-item-group>
       </a-menu>
 
       <div class="user-info-box">
