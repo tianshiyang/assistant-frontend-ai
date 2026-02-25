@@ -77,7 +77,7 @@ import { reactive, ref } from 'vue'
 import { deleteProductAPI, getProductListAPI } from '@/api/module/backend/product'
 import { ProductStatus, ProductStatusMap, type ProductItem } from '@/api/types/backend/product'
 import SelectProductCategory from './components/SelectProductCategory.vue'
-import CreateOrUpdateProduct from './components/createOrUpdateProduct.vue'
+import CreateOrUpdateProduct from './components/CreateOrUpdateProduct.vue'
 import { message } from 'ant-design-vue'
 
 const loading = ref(false)
