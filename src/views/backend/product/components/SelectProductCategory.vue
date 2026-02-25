@@ -17,7 +17,7 @@ import type { ProductCategoryItem } from '@/api/types/backend/productCategory'
 import { getAllProductCategoryListAPI } from '@/api/module/backend/productCategory'
 
 // 双向绑定的值：使用分类编码作为值
-const modelValue = defineModel<string | undefined>({
+const modelValue = defineModel<number | undefined>({
   default: undefined,
 })
 

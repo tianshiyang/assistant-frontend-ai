@@ -28,3 +28,11 @@ export interface ProductItem {
   updated_at: string
   category_name: string
 }
+
+export interface UpdateProductParams {
+  id: number
+  name: string
+  category_id: number
+  standard_price: string
+  cost_price: string
+}

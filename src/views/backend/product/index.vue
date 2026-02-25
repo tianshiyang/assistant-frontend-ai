@@ -44,10 +44,21 @@
               {{ ProductStatusMap[record.status as ProductStatus] }}
             </a-tag>
           </template>
+          <template v-if="column.key === 'operation'">
+            <a-button type="link" @click="handleEditProduct(record)">编辑</a-button>
+          </template>
         </template>
       </a-table>
     </div>
   </div>
+
+  <!-- 编辑商品弹窗 -->
+  <CreateOrUpdateProduct
+    v-if="createOrUpdateData.visible"
+    v-model="createOrUpdateData.visible"
+    :product-id="createOrUpdateData.productId"
+    @success="fetchCategoryList"
+  />
 </template>
 
 <script lang="ts" setup>
@@ -55,6 +66,7 @@ import { reactive, ref } from 'vue'
 import { getProductListAPI } from '@/api/module/backend/product'
 import { ProductStatus, ProductStatusMap, type ProductItem } from '@/api/types/backend/product'
 import SelectProductCategory from './components/SelectProductCategory.vue'
+import CreateOrUpdateProduct from './components/createOrUpdateProduct.vue'
 
 const loading = ref(false)
 
@@ -115,6 +127,11 @@ const columns = [
     dataIndex: 'updated_at',
     key: 'updated_at',
   },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+    key: 'operation',
+  },
 ]
 
 // 搜索
@@ -153,6 +170,18 @@ const handleTableChange = (pagination: { current?: number; pageSize?: number }) 
   fetchCategoryList()
 }
 
+const createOrUpdateData = reactive({
+  visible: false,
+  productId: '' as unknown as number,
+})
+
+// 编辑商品
+const handleEditProduct = (product: ProductItem) => {
+  createOrUpdateData.visible = true
+  createOrUpdateData.productId = product.id
+}
+
+// 获取分类列表
 fetchCategoryList()
 </script>
 
