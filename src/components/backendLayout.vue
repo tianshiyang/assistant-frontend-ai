@@ -13,7 +13,6 @@
         v-model:selected-keys="selectedKeys"
         mode="vertical"
         theme="light"
-        :inline-collapsed="true"
         class="layout-menu"
         @click="handleMenuClick"
       >
