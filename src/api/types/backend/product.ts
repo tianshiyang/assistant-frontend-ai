@@ -36,3 +36,10 @@ export interface UpdateProductParams {
   standard_price: string
   cost_price: string
 }
+
+export interface CreateProductParams {
+  name: string
+  category_id: number
+  standard_price: string
+  cost_price: string
+}

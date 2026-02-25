@@ -22,6 +22,7 @@
       />
       <SelectProductCategory v-model="searchData.category_id" class="default-input-select" />
       <a-button type="primary" @click="handleSearch"> 搜索 </a-button>
+      <a-button type="primary" @click="handleCreateProduct"> 新增商品 </a-button>
     </div>
 
     <!-- 分类列表 -->
@@ -174,6 +175,12 @@ const createOrUpdateData = reactive({
   visible: false,
   productId: '' as unknown as number,
 })
+
+// 新增商品
+const handleCreateProduct = () => {
+  createOrUpdateData.visible = true
+  createOrUpdateData.productId = '' as unknown as number
+}
 
 // 编辑商品
 const handleEditProduct = (product: ProductItem) => {

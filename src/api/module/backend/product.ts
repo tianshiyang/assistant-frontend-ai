@@ -1,5 +1,6 @@
 import type { BaseListResponse } from '@/api/types'
 import type {
+  CreateProductParams,
   ProductItem,
   ProductListParams,
   UpdateProductParams,
@@ -28,6 +29,15 @@ export const getProductDetailAPI = (params: { id: number | string }) => {
 export const updateProductAPI = (data: UpdateProductParams) => {
   return request({
     url: '/api/manage/product/update',
+    method: 'post',
+    data,
+  })
+}
+
+// 新增商品
+export const createProductAPI = (data: CreateProductParams) => {
+  return request({
+    url: '/api/manage/product/create',
     method: 'post',
     data,
   })

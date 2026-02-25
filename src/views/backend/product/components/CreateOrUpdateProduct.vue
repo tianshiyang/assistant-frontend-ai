@@ -31,7 +31,11 @@
 import { ref } from 'vue'
 import { message } from 'ant-design-vue'
 import SelectProductCategory from './SelectProductCategory.vue'
-import { getProductDetailAPI, updateProductAPI } from '@/api/module/backend/product'
+import {
+  createProductAPI,
+  getProductDetailAPI,
+  updateProductAPI,
+} from '@/api/module/backend/product'
 
 interface Props {
   productId: number | string
@@ -71,11 +75,14 @@ const createProduct = async () => {
 
   loading.value = true
   try {
-    // const params = {
-    //   name: form.name.trim(),
-    // }
+    const params = {
+      name: form.name.trim(),
+      category_id: form.category_id as number,
+      standard_price: form.standard_price,
+      cost_price: form.cost_price,
+    }
 
-    // await createDatasetAPI(params)
+    await createProductAPI(params)
     message.success('创建成功')
     emit('success')
     handleCancel()
