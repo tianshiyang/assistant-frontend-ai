@@ -42,3 +42,12 @@ export const createProductAPI = (data: CreateProductParams) => {
     data,
   })
 }
+
+// 删除商品
+export const deleteProductAPI = (data: { id: number | string }) => {
+  return request({
+    url: '/api/manage/product/delete',
+    method: 'post',
+    data,
+  })
+}

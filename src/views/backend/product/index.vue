@@ -47,6 +47,16 @@
           </template>
           <template v-if="column.key === 'operation'">
             <a-button type="link" @click="handleEditProduct(record)">编辑</a-button>
+            <a-popconfirm
+              :title="`确定要删除【${record.name}】吗？`"
+              ok-text="是"
+              cancel-text="否"
+              @confirm="handleDeleteProduct(record)"
+            >
+              <!-- ok-text="Yes"
+              cancel-text="No" -->
+              <a-button type="link">删除</a-button>
+            </a-popconfirm>
           </template>
         </template>
       </a-table>
@@ -64,10 +74,11 @@
 
 <script lang="ts" setup>
 import { reactive, ref } from 'vue'
-import { getProductListAPI } from '@/api/module/backend/product'
+import { deleteProductAPI, getProductListAPI } from '@/api/module/backend/product'
 import { ProductStatus, ProductStatusMap, type ProductItem } from '@/api/types/backend/product'
 import SelectProductCategory from './components/SelectProductCategory.vue'
 import CreateOrUpdateProduct from './components/createOrUpdateProduct.vue'
+import { message } from 'ant-design-vue'
 
 const loading = ref(false)
 
@@ -186,6 +197,13 @@ const handleCreateProduct = () => {
 const handleEditProduct = (product: ProductItem) => {
   createOrUpdateData.visible = true
   createOrUpdateData.productId = product.id
+}
+
+// 删除商品
+const handleDeleteProduct = async (product: ProductItem) => {
+  await deleteProductAPI({ id: product.id })
+  message.success('删除成功')
+  fetchCategoryList()
 }
 
 // 获取分类列表

@@ -68,27 +68,24 @@ const rules = {
 
 // 创建商品
 const createProduct = async () => {
-  if (!form.name.trim()) {
-    message.warning('请输入知识库名称')
-    return
-  }
+  formRef.value.validate().then(async () => {
+    loading.value = true
+    try {
+      const params = {
+        name: form.name.trim(),
+        category_id: form.category_id as number,
+        standard_price: form.standard_price,
+        cost_price: form.cost_price,
+      }
 
-  loading.value = true
-  try {
-    const params = {
-      name: form.name.trim(),
-      category_id: form.category_id as number,
-      standard_price: form.standard_price,
-      cost_price: form.cost_price,
+      await createProductAPI(params)
+      message.success('创建成功')
+      emit('success')
+      handleCancel()
+    } finally {
+      loading.value = false
     }
-
-    await createProductAPI(params)
-    message.success('创建成功')
-    emit('success')
-    handleCancel()
-  } finally {
-    loading.value = false
-  }
+  })
 }
 
 // 编辑商品
