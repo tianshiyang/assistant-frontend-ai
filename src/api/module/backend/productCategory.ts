@@ -8,7 +8,7 @@ export interface ProductCategoryListParams {
   category_name?: string
 }
 
-// 获取商品分类列表
+// 获取商品分类列表（分页）
 export const getProductCategoryListAPI = (params: ProductCategoryListParams) => {
   return request<BaseListResponse<ProductCategoryItem>>({
     url: '/api/manage/product/category/list',
@@ -17,3 +17,11 @@ export const getProductCategoryListAPI = (params: ProductCategoryListParams) => 
   })
 }
 
+// 获取所有商品分类（远程搜索使用）
+export const getAllProductCategoryListAPI = (params: { name?: string }) => {
+  return request<ProductCategoryItem[]>({
+    url: '/api/manage/product/category/list/all',
+    method: 'get',
+    params,
+  })
+}

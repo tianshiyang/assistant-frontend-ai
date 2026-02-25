@@ -39,6 +39,12 @@
             </template>
             <span>商品分类</span>
           </a-menu-item>
+          <a-menu-item key="/backend/product/list">
+            <template #icon>
+              <CarOutlined />
+            </template>
+            <span>商品列表</span>
+          </a-menu-item>
         </a-menu-item-group>
       </a-menu>
 
@@ -55,7 +61,13 @@
 <script lang="ts" setup>
 import { ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
-import { UserOutlined, TeamOutlined, AppstoreOutlined, SwapOutlined } from '@ant-design/icons-vue'
+import {
+  UserOutlined,
+  TeamOutlined,
+  AppstoreOutlined,
+  SwapOutlined,
+  CarOutlined,
+} from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
 import { getAllConversationListAPI } from '@/api/module/ai'

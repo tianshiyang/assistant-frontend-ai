@@ -16,8 +16,13 @@ export const backendRouter = [
       },
       {
         path: '/backend/product/category/list',
-        name: 'productList',
+        name: 'productCategoryList',
         component: () => import('@/views/backend/productCategory/index.vue'),
+      },
+      {
+        path: '/backend/product/list',
+        name: 'productList',
+        component: () => import('@/views/backend/product/index.vue'),
       },
     ],
   },
