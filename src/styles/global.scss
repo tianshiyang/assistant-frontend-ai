@@ -1,0 +1,11 @@
+body {
+  padding: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.default-input-select {
+  width: 240px !important;
+  :deep(.ant-input-number-input, .ant-select-selector) {
+    width: 240px !important;
+  }
+}

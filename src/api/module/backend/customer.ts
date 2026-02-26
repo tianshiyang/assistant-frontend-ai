@@ -42,3 +42,12 @@ export const getCustomerDetailAPI = (params: { customer_id: number }) => {
     params,
   })
 }
+
+// 获取所有客户列表
+export const getAllCustomerListAPI = (params: { name?: string }) => {
+  return request<CustomerItem[]>({
+    url: '/api/manage/customer/all_list',
+    method: 'get',
+    params,
+  })
+}

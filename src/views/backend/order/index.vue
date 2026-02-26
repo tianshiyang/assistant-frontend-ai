@@ -26,6 +26,7 @@
         </a-select-option>
       </a-select>
       <a-button type="primary" @click="handleSearch"> 搜索 </a-button>
+      <a-button type="primary" @click="handleCreateOrder"> 新增订单 </a-button>
     </div>
 
     <!-- 订单列表 -->
@@ -62,12 +63,21 @@
       </a-table>
     </div>
   </div>
+
+  <!-- 创建或编辑订单 -->
+  <CreateOrUpdateOrder
+    v-if="createOrUpdateOrderData.visible"
+    v-model="createOrUpdateOrderData.visible"
+    :order-id="createOrUpdateOrderData.orderId"
+    @success="fetchOrderList"
+  />
 </template>
 
 <script lang="ts" setup>
 import type { OrderStatus as OrderStatusType } from '@/api/types/backend/order'
 import { OrderStatusMap, type Order } from '@/api/types/backend/order'
 import { getOrderListAPI } from '@/api/module/backend/order'
+import CreateOrUpdateOrder from './components/CreateOrUpdateOrder.vue'
 
 const loading = ref(false)
 
@@ -99,9 +109,14 @@ const columns = [
     key: 'order_date',
   },
   {
-    title: '销售',
+    title: '成单销售',
     dataIndex: 'sales_name',
     key: 'sales_name',
+  },
+  {
+    title: '成单客户',
+    dataIndex: 'customer_name',
+    key: 'customer_name',
   },
   {
     title: '订单状态',
@@ -208,6 +223,16 @@ const handleTableChange = (pagination: { current?: number; pageSize?: number }) 
     searchData.page_size = pagination.pageSize
   }
   fetchOrderList()
+}
+
+const createOrUpdateOrderData = reactive({
+  visible: false,
+  orderId: '' as unknown as number,
+})
+
+const handleCreateOrder = () => {
+  createOrUpdateOrderData.visible = true
+  createOrUpdateOrderData.orderId = '' as unknown as number
 }
 
 fetchOrderList()

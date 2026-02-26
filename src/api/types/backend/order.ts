@@ -42,3 +42,10 @@ export interface Order {
   sales_name: string
   order_item: OrderItem[]
 }
+
+export interface CreateOrder {
+  sales_id: number
+  customer_id: number
+  product_id: number
+  quantity: number
+}

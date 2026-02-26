@@ -51,3 +51,11 @@ export const deleteProductAPI = (data: { id: number | string }) => {
     data,
   })
 }
+
+export const getAllProductListAPI = (params: { name?: string }) => {
+  return request<ProductItem[]>({
+    url: '/api/manage/product/list_all',
+    method: 'get',
+    params,
+  })
+}

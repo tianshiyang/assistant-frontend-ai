@@ -29,3 +29,11 @@ export const getSalesDetailAPI = (params: { sales_id: number }) => {
     params,
   })
 }
+
+export const getAllSalesListAPI = (params: { name?: string }) => {
+  return request<SalesItem[]>({
+    url: '/api/manage/sales/all_no_pagination',
+    method: 'get',
+    params,
+  })
+}
