@@ -24,6 +24,11 @@ export const backendRouter = [
         name: 'productList',
         component: () => import('@/views/backend/product/index.vue'),
       },
+      {
+        path: '/backend/order/list',
+        name: 'orderList',
+        component: () => import('@/views/backend/order/index.vue'),
+      },
     ],
   },
 ]

@@ -45,6 +45,15 @@
             <span>商品列表</span>
           </a-menu-item>
         </a-menu-item-group>
+
+        <a-menu-item-group title="订单管理">
+          <a-menu-item key="/backend/order/list">
+            <template #icon>
+              <AccountBookOutlined />
+            </template>
+            <span>订单列表</span>
+          </a-menu-item>
+        </a-menu-item-group>
       </a-menu>
 
       <div class="user-info-box">
@@ -66,6 +75,7 @@ import {
   AppstoreOutlined,
   SwapOutlined,
   CarOutlined,
+  AccountBookOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
