@@ -243,7 +243,13 @@ const handleSearch = () => {
 const fetchOrderList = async () => {
   loading.value = true
   try {
-    const res = await getOrderListAPI()
+    const params = {
+      page_no: searchData.page_no,
+      page_size: searchData.page_size,
+      order_no: searchData.order_no,
+      order_status: searchData.order_status,
+    }
+    const res = await getOrderListAPI(params)
     tableDataList.list = res.list || []
     tableDataList.total = res.total || 0
   } finally {

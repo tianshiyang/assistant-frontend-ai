@@ -3,10 +3,11 @@ import type { Order, CreateOrder } from '@/api/types/backend/order'
 import { request } from '@/utils/request'
 
 // 订单列表
-export const getOrderListAPI = () => {
+export const getOrderListAPI = (params: any) => {
   return request<BaseListResponse<Order>>({
     url: '/api/manage/order/list',
     method: 'get',
+    params,
   })
 }
 
