@@ -49,6 +49,29 @@
               {{ getOrderStatusLabel(record.order_status) }}
             </a-tag>
           </template>
+          <template v-if="column.key === 'operation'">
+            <a-button
+              v-if="[OrderStatus.CREATED, OrderStatus.PAID].includes(record.order_status)"
+              type="link"
+              @click="handlePayOrder(record)"
+            >
+              支付
+            </a-button>
+            <a-popconfirm title="确定取消支付吗？" @confirm="handleCancelPayOrder(record)">
+              <a-button v-if="OrderStatus.CREATED === record.order_status" type="link">
+                取消支付
+              </a-button>
+            </a-popconfirm>
+
+            <a-popconfirm title="确定删除订单吗？" @confirm="handleDeleteOrder(record)">
+              <a-button
+                v-if="[OrderStatus.CREATED, OrderStatus.CANCELED].includes(record.order_status)"
+                type="link"
+              >
+                删除
+              </a-button>
+            </a-popconfirm>
+          </template>
         </template>
 
         <template #expandedRowRender="{ record }">
@@ -71,13 +94,22 @@
     :order-id="createOrUpdateOrderData.orderId"
     @success="fetchOrderList"
   />
+
+  <!-- 支付订单 -->
+  <PayOrderModal
+    v-if="payOrderData.visible"
+    v-model="payOrderData.visible"
+    :order-id="payOrderData.orderId"
+    @success="fetchOrderList"
+  />
 </template>
 
 <script lang="ts" setup>
 import type { OrderStatus as OrderStatusType } from '@/api/types/backend/order'
-import { OrderStatusMap, type Order } from '@/api/types/backend/order'
-import { getOrderListAPI } from '@/api/module/backend/order'
+import { OrderStatus, OrderStatusMap, type Order } from '@/api/types/backend/order'
+import { getOrderListAPI, cancelPayOrderAPI, deleteOrderAPI } from '@/api/module/backend/order'
 import CreateOrUpdateOrder from './components/CreateOrUpdateOrder.vue'
+import PayOrderModal from './components/PayOrderModal.vue'
 
 const loading = ref(false)
 
@@ -142,6 +174,11 @@ const columns = [
     title: '更新时间',
     dataIndex: 'updated_at',
     key: 'updated_at',
+  },
+  {
+    title: '操作',
+    dataIndex: 'operation',
+    key: 'operation',
   },
 ]
 
@@ -230,9 +267,33 @@ const createOrUpdateOrderData = reactive({
   orderId: '' as unknown as number,
 })
 
+const payOrderData = reactive({
+  visible: false,
+  orderId: '' as unknown as number,
+})
+
+// 创建或编辑订单
 const handleCreateOrder = () => {
   createOrUpdateOrderData.visible = true
   createOrUpdateOrderData.orderId = '' as unknown as number
+}
+
+// 支付订单
+const handlePayOrder = (record: Order) => {
+  payOrderData.visible = true
+  payOrderData.orderId = record.id
+}
+
+// 取消支付
+const handleCancelPayOrder = async (record: Order) => {
+  await cancelPayOrderAPI({ order_id: record.id })
+  fetchOrderList()
+}
+
+// 删除订单
+const handleDeleteOrder = async (record: Order) => {
+  await deleteOrderAPI({ order_id: record.id })
+  fetchOrderList()
 }
 
 fetchOrderList()
@@ -240,7 +301,7 @@ fetchOrderList()
 
 <style scoped lang="scss">
 .container {
-  max-width: 1200px;
+  min-width: 1200px;
   width: 100%;
 
   .container-header {

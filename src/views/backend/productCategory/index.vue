@@ -135,7 +135,7 @@ fetchCategoryList()
 
 <style scoped lang="scss">
 .container {
-  max-width: 1200px;
+  min-width: 1200px;
   width: 100%;
 
   .container-header {

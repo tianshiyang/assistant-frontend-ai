@@ -182,7 +182,7 @@ fetchDatasetList()
 
 <style scoped lang="scss">
 .dataset-page {
-  max-width: 1200px;
+  min-width: 1200px;
   width: 100%;
 
   .dataset-header {

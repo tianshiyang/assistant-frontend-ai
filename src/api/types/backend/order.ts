@@ -12,18 +12,16 @@ export interface OrderItem {
 
 /** 订单状态 */
 export enum OrderStatus {
-  PENDING = 'pending',
   PAID = 'paid',
   COMPLETED = 'completed',
-  CANCELLED = 'cancelled',
+  CANCELED = 'canceled',
   CREATED = 'created',
 }
 
 export const OrderStatusMap = {
-  [OrderStatus.PENDING]: '待支付',
-  [OrderStatus.PAID]: '已支付',
+  [OrderStatus.PAID]: '支付中',
   [OrderStatus.COMPLETED]: '已完成',
-  [OrderStatus.CANCELLED]: '已取消',
+  [OrderStatus.CANCELED]: '已取消',
   [OrderStatus.CREATED]: '已创建',
 }
 

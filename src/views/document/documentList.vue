@@ -178,7 +178,7 @@ getDocumentList()
   width: 240px;
 }
 .document-list-page {
-  max-width: 1200px;
+  min-width: 1200px;
   width: 100%;
   .document-list-header {
     margin-bottom: 24px;
