@@ -36,9 +36,6 @@ const handleDeleteHistory = (_item: HistoryItem) => {
 </script>
 
 <style scoped lang="scss">
-:deep(.ant-layout-content .layout-content) {
-  padding-left: 0 !important;
-}
 .history-layout {
   height: 100%;
   overflow: hidden;

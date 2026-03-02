@@ -68,14 +68,14 @@
         <UserInfo />
       </div>
     </a-layout-sider>
-    <a-layout-content class="layout-content">
+    <a-layout-content class="layout-content" :class="{ 'layout-content-full': isHistoryRoute }">
       <router-view />
     </a-layout-content>
   </a-layout>
 </template>
 
 <script lang="ts" setup>
-import { ref, watch } from 'vue'
+import { computed, ref, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import {
   UserOutlined,
@@ -99,6 +99,7 @@ interface ConversationItem extends ConversationList {
 const router = useRouter()
 const route = useRoute()
 
+const isHistoryRoute = computed(() => route.path === '/backend/history/list')
 const selectedKeys = ref<string[]>([])
 
 const conversationList = ref<ConversationItem[]>([])
@@ -236,6 +237,10 @@ getAllConversationList()
   overflow-y: auto;
   overflow-x: hidden;
   padding: 24px;
+
+  &.layout-content-full {
+    padding: 24px 24px 0 0;
+  }
 }
 
 .user-info-box {
