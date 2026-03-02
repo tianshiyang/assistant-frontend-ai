@@ -30,8 +30,8 @@ export const backendRouter = [
         component: () => import('@/views/backend/order/index.vue'),
       },
       {
-        path: '/backend/history/list',
-        name: 'orderList',
+        path: '/backend/history/list/:conversation_id?',
+        name: 'historyList',
         component: () => import('@/views/backend/history/index.vue'),
       },
     ],

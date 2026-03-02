@@ -38,7 +38,7 @@
 </template>
 
 <script lang="ts" setup>
-import { createVNode, onMounted, ref } from 'vue'
+import { createVNode, ref } from 'vue'
 import { Modal, message } from 'ant-design-vue'
 import { DeleteOutlined, ExclamationCircleOutlined } from '@ant-design/icons-vue'
 import { getAllConversationListAPI, deleteConversationAPI } from '@/api/module/ai'
@@ -65,7 +65,7 @@ const loading = ref(false)
 function mapConversationToHistory(list: ConversationList[]): HistoryItem[] {
   return list.map(item => ({
     id: item.id,
-    title: item.name || '未命名会话',
+    title: item.name,
     isHover: false,
   }))
 }
@@ -106,9 +106,7 @@ const handleDelete = (item: HistoryItem) => {
   })
 }
 
-onMounted(() => {
-  loadHistoryList()
-})
+loadHistoryList()
 
 defineExpose({
   historyList,

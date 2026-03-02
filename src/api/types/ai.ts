@@ -22,3 +22,29 @@ export interface ConversationList {
   created_at: string
   updated_at: string
 }
+
+/** 管理端历史消息类型（/api/ai/conversation/messages & /api/manage/ai/chat） */
+export enum ManageResponseType {
+  STOP = 'stop',
+  PING = 'ping',
+  DONE = 'done',
+  ERROR = 'error',
+  TOOL_CALL = 'tool_call',
+  TOOL_RESULT = 'tool_result',
+  SAVE_TOKEN = 'save_token',
+  GENERATE = 'generate',
+  CREATE_CONVERSATION = 'create_conversation',
+  REWRITE_QUESTION_START = 'rewrite_question_START',
+  REWRITE_QUESTION_END = 'rewrite_question_END',
+}
+
+/** 管理端历史消息单条（/api/ai/conversation/messages 返回的扁平结构） */
+export interface ManageConversationMessage {
+  updated_time: number
+  content: string | Record<string, unknown>
+  type: ManageResponseType
+  message_id: string
+  conversation_id: string
+  tool_call?: string
+  _is_expanded?: boolean
+}

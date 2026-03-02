@@ -237,9 +237,13 @@ getAllConversationList()
   overflow-y: auto;
   overflow-x: hidden;
   padding: 24px;
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
 
   &.layout-content-full {
-    padding: 24px 24px 0 0;
+    padding: 0;
   }
 }
 
