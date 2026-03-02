@@ -103,7 +103,7 @@ const updateSelectedKeys = () => {
 
 // 获取历史会话
 const getAllConversationList = async () => {
-  const res = await getAllConversationListAPI()
+  const res = await getAllConversationListAPI({ type: 'skills' })
   conversationList.value = res.map(item => {
     return {
       ...item,

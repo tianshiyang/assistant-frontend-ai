@@ -54,6 +54,14 @@
             <span>订单列表</span>
           </a-menu-item>
         </a-menu-item-group>
+        <a-menu-item-group title="历史会话">
+          <a-menu-item key="/backend/history/list">
+            <template #icon>
+              <ClockCircleOutlined />
+            </template>
+            <span>历史会话</span>
+          </a-menu-item>
+        </a-menu-item-group>
       </a-menu>
 
       <div class="user-info-box">
@@ -76,6 +84,7 @@ import {
   SwapOutlined,
   CarOutlined,
   AccountBookOutlined,
+  ClockCircleOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
@@ -102,7 +111,7 @@ const updateSelectedKeys = () => {
 
 // 获取历史会话
 const getAllConversationList = async () => {
-  const res = await getAllConversationListAPI()
+  const res = await getAllConversationListAPI({ type: 'manage' })
   conversationList.value = res.map(item => {
     return {
       ...item,

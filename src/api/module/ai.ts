@@ -49,10 +49,11 @@ export const stopChatAPI = (data: { conversation_id: string }) => {
 }
 
 // 获取所有会话列表
-export const getAllConversationListAPI = () => {
+export const getAllConversationListAPI = (params: { type: 'skills' | 'manage' }) => {
   return request<ConversationList[]>({
     url: '/api/ai/conversation/all',
     method: 'GET',
+    params,
   })
 }
 
