@@ -35,16 +35,22 @@
                     />
                   </div>
                   <div v-else-if="item.type === ManageResponseType.GENERATE" class="generate-block">
-                    <div v-if="JSON.parse(item.content as string).type === 'table'">
+                    <template v-if="isTableContent(item.content)">
                       <a-table
-                        :columns="JSON.parse(item.content as string).columns"
-                        :data-source="JSON.parse(item.content as string).dataSource"
+                        :columns="getTableColumns(item.content)"
+                        :data-source="getTableDataSource(item.content)"
                         :pagination="false"
                       ></a-table>
-                    </div>
-                    <div v-else>
+                    </template>
+                    <template v-else-if="isEchartsContent(item.content)">
+                      <div
+                        :ref="el => initEcharts(el, item.content)"
+                        class="echarts-container"
+                      ></div>
+                    </template>
+                    <template v-else>
                       <MdPreview :model-value="String(item.content)" />
-                    </div>
+                    </template>
                   </div>
                   <div
                     v-else-if="item.type === ManageResponseType.REWRITE_QUESTION_START"
@@ -145,6 +151,8 @@
 
 <script lang="ts" setup>
 import { nextTick, ref, watch } from 'vue'
+import * as echarts from 'echarts'
+import type { EChartsOption } from 'echarts'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
@@ -191,6 +199,71 @@ interface DisplayRound {
 }
 
 const displayRounds = ref<DisplayRound[]>([])
+
+interface StructuredContent {
+  type?: string
+  columns?: unknown[]
+  dataSource?: unknown[]
+  echarts_option?: unknown
+}
+
+function safeParseContent(content: DisplayMessage['content']): StructuredContent | null {
+  if (typeof content !== 'string') return null
+  try {
+    return JSON.parse(content) as StructuredContent
+  } catch {
+    return null
+  }
+}
+
+function isTableContent(content: DisplayMessage['content']): boolean {
+  const parsed = safeParseContent(content)
+  return (
+    parsed?.type === 'table' && Array.isArray(parsed.columns) && Array.isArray(parsed.dataSource)
+  )
+}
+
+function getTableColumns(content: DisplayMessage['content']): unknown[] {
+  const parsed = safeParseContent(content)
+  return (parsed?.columns as unknown[]) || []
+}
+
+function getTableDataSource(content: DisplayMessage['content']): unknown[] {
+  const parsed = safeParseContent(content)
+  return (parsed?.dataSource as unknown[]) || []
+}
+
+function isEchartsContent(content: DisplayMessage['content']): boolean {
+  const parsed = safeParseContent(content)
+  return parsed?.type === 'echarts' && !!parsed.echarts_option
+}
+
+function getEchartsOption(content: DisplayMessage['content']): EChartsOption | null {
+  const parsed = safeParseContent(content)
+  if (parsed?.type === 'echarts' && parsed.echarts_option) {
+    return parsed.echarts_option as EChartsOption
+  }
+  return null
+}
+
+function initEcharts(el: unknown, content: DisplayMessage['content']) {
+  if (!el || !(el instanceof HTMLElement)) return
+  const option = getEchartsOption(content)
+  if (!option) return
+
+  const tryInit = (retry = 0) => {
+    // 容器宽高为 0 时，ECharts 会报错，这里延迟到有实际尺寸再初始化
+    if (el.clientWidth === 0 || el.clientHeight === 0) {
+      if (retry >= 10) return
+      window.requestAnimationFrame(() => tryInit(retry + 1))
+      return
+    }
+    const chart = echarts.init(el)
+    chart.setOption(option)
+  }
+
+  tryInit()
+}
 
 function tokenContent(item: DisplayMessage): Record<string, number> | null {
   const c = item.content
@@ -570,6 +643,10 @@ watch(
 }
 .generate-block {
   margin-top: 10px;
+}
+.echarts-container {
+  width: 100%;
+  height: 400px;
 }
 .hide {
   display: none;
