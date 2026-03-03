@@ -34,6 +34,15 @@
                       alt="加载中"
                     />
                   </div>
+                  <InteractionBlock
+                    v-else-if="item.type === ManageResponseType.INTERACTION"
+                    :conversation-id="conversationId"
+                    :round-index="roundIndex"
+                    :message-index="idx"
+                    :content="item.content"
+                    :message_id="item.message_id"
+                    @manage-interaction-action="handleInteractionAction"
+                  />
                   <div v-else-if="item.type === ManageResponseType.GENERATE" class="generate-block">
                     <template v-if="isTableContent(item.content)">
                       <a-table
@@ -179,9 +188,15 @@ import {
   type ManageConversationMessage,
 } from '@/api/types/ai'
 import type { StreamResponse } from '@/api/types'
-import { getConversationHistoryAPI, manageChatAPI, stopManageChatAPI } from '@/api/module/ai'
+import {
+  getConversationHistoryAPI,
+  manageChatAPI,
+  manageTextToSqlInteractionAPI,
+  stopManageChatAPI,
+} from '@/api/module/ai'
 import { ChatResponseType } from '@/api/types/public'
 import HistorySendMessage from './HistorySendMessage.vue'
+import InteractionBlock from './InteractionBlock.vue'
 
 const props = withDefaults(
   defineProps<{
@@ -205,6 +220,7 @@ const loading = ref(false)
 const isConversationLoading = ref(false)
 
 interface DisplayMessage {
+  message_id: string
   type: string
   content: string | Record<string, unknown>
   tool_call?: string
@@ -225,6 +241,21 @@ interface StructuredContent {
   columns?: unknown[]
   dataSource?: unknown[]
   echarts_option?: unknown
+}
+
+const handleInteractionAction = (value: any) => {
+  let data = null
+  if (value.action === 'approve') {
+    // 同意
+    data = {
+      type: value.action,
+    }
+  }
+  manageTextToSqlInteractionAPI({
+    conversation_id: props.conversationId!,
+    resume: JSON.stringify(data),
+    message_id: value.message_id,
+  })
 }
 
 function safeParseContent(content: DisplayMessage['content']): StructuredContent | null {
@@ -308,14 +339,13 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
     let lastGen: DisplayMessage | null = null
     for (const m of item.messages || []) {
       const type = String((m as { type?: string }).type ?? '')
-      if (type === ManageResponseType.PING) continue
       const content = (m as { content?: string | Record<string, unknown> }).content
       if (type === ManageResponseType.GENERATE) {
         const str = typeof content === 'string' ? content : String(content ?? '')
         if (lastGen) {
           lastGen.content = String(lastGen.content || '') + str
         } else {
-          lastGen = { type: ManageResponseType.GENERATE, content: str }
+          lastGen = { type: ManageResponseType.GENERATE, content: str, message_id: m.message_id }
           merged.push(lastGen)
         }
       } else {
@@ -323,6 +353,7 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
         const msg: DisplayMessage = {
           type,
           content: content ?? '',
+          message_id: m.message_id,
           tool_call: (m as { tool_call?: string }).tool_call,
           _is_expanded: (m as { _is_expanded?: boolean })._is_expanded,
         }
@@ -364,7 +395,12 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
           if (lastGen) {
             lastGen.content = String(lastGen.content || '') + content
           } else {
-            lastGen = { type: ManageResponseType.GENERATE, content, _is_expanded: m._is_expanded }
+            lastGen = {
+              type: ManageResponseType.GENERATE,
+              content,
+              _is_expanded: m._is_expanded,
+              message_id: m.message_id,
+            }
             merged.push(lastGen)
           }
         } else {
@@ -405,6 +441,7 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
       content: m.content,
       tool_call: m.tool_call,
       _is_expanded: m._is_expanded,
+      message_id: m.message_id,
     })
   }
   flush()
@@ -461,11 +498,6 @@ function handleSend(payload: { question: string }) {
           loadMessages()
         }
 
-        // 心跳消息，管理端不展示
-        if (event.type === ChatResponseType.PING) {
-          return
-        }
-
         if (event.type === ChatResponseType.CREATE_CONVERSATION) {
           const newId = typeof event.content === 'string' ? event.content : ''
           if (newId) emit('conversation-created', newId)
@@ -478,7 +510,12 @@ function handleSend(payload: { question: string }) {
             content: event.content,
             tool_call: event.tool_call,
             _is_expanded: event._is_expanded,
+            message_id: event.message_id,
           })
+        }
+
+        if (event.type === ChatResponseType.PING) {
+          push()
         }
 
         if (event.type === ChatResponseType.GENERATE) {
@@ -508,6 +545,7 @@ function handleSend(payload: { question: string }) {
         isConversationLoading.value = false
       },
       onclose: () => {
+        console.log('sse连接关闭')
         isConversationLoading.value = false
       },
     }

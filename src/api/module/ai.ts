@@ -126,3 +126,16 @@ export const getUserPossibleQuestionsAPI = (data: { message_id: string }) => {
     data,
   })
 }
+
+// 人机交互
+export const manageTextToSqlInteractionAPI = (data: {
+  conversation_id: string
+  resume: any
+  message_id: string
+}) => {
+  return request({
+    url: '/api/manage/ai/chat/interaction',
+    method: 'post',
+    data,
+  })
+}
