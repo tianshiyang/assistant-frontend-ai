@@ -11,6 +11,7 @@
     <a-layout-content class="history-main">
       <HistoryContent
         :conversation-id="selectedConversationId"
+        @get-history-list="handleGetHistoryList"
         @conversation-created="handleConversationCreated"
       />
     </a-layout-content>
@@ -50,7 +51,7 @@ watch(
 const handleNewChat = () => {
   selectedConversationId.value = ''
   router.push({
-    name: 'historyList',
+    name: 'manageHistoryList',
     params: { conversation_id: undefined },
   })
 }
@@ -59,7 +60,7 @@ const handleNewChat = () => {
 const handleSelectHistory = (item: HistoryItem) => {
   selectedConversationId.value = item.id
   router.push({
-    name: 'historyList',
+    name: 'manageHistoryList',
     params: { conversation_id: item.id },
   })
 }
@@ -69,7 +70,7 @@ const handleDeleteHistory = (item: HistoryItem) => {
   if (selectedConversationId.value === item.id) {
     selectedConversationId.value = null
     router.push({
-      name: 'historyList',
+      name: 'manageHistoryList',
       params: { conversation_id: undefined },
     })
   }
@@ -80,9 +81,14 @@ const handleDeleteHistory = (item: HistoryItem) => {
 const handleConversationCreated = (conversationId: string) => {
   selectedConversationId.value = conversationId
   router.push({
-    name: 'historyList',
+    name: 'manageHistoryList',
     params: { conversation_id: conversationId },
   })
+  sidebarRef.value?.loadHistoryList()
+}
+
+// 获取历史记录
+const handleGetHistoryList = () => {
   sidebarRef.value?.loadHistoryList()
 }
 </script>

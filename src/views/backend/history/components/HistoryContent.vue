@@ -162,7 +162,7 @@ import {
   type ManageConversationMessage,
 } from '@/api/types/ai'
 import type { StreamResponse } from '@/api/types'
-import { getConversationHistoryAPI, manageChatAPI, stopChatAPI } from '@/api/module/ai'
+import { getConversationHistoryAPI, manageChatAPI, stopManageChatAPI } from '@/api/module/ai'
 import { ChatResponseType } from '@/api/types/public'
 import HistorySendMessage from './HistorySendMessage.vue'
 
@@ -180,6 +180,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   'conversation-created': [conversationId: string]
+  'get-history-list': []
 }>()
 
 const messagesBoxRef = ref<HTMLDivElement>()
@@ -199,6 +200,8 @@ interface DisplayRound {
 }
 
 const displayRounds = ref<DisplayRound[]>([])
+
+const router = useRouter()
 
 interface StructuredContent {
   type?: string
@@ -281,10 +284,6 @@ function setExpanded(item: DisplayMessage, v: boolean) {
   item._is_expanded = v
 }
 
-function isLastPing(round: DisplayRound, idx: number): boolean {
-  return idx === round.messages.length - 1 && round.messages[idx]?.type === 'ping'
-}
-
 /** 将聊天页用的会话历史（按轮次）转为展示数据，合并每轮内的 generate */
 function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[] {
   return list.map(item => {
@@ -292,14 +291,14 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
     let lastGen: DisplayMessage | null = null
     for (const m of item.messages || []) {
       const type = String((m as { type?: string }).type ?? '')
-      if (type === 'ping') continue
+      if (type === ManageResponseType.PING) continue
       const content = (m as { content?: string | Record<string, unknown> }).content
-      if (type === 'generate') {
+      if (type === ManageResponseType.GENERATE) {
         const str = typeof content === 'string' ? content : String(content ?? '')
         if (lastGen) {
           lastGen.content = String(lastGen.content || '') + str
         } else {
-          lastGen = { type: 'generate', content: str }
+          lastGen = { type: ManageResponseType.GENERATE, content: str }
           merged.push(lastGen)
         }
       } else {
@@ -310,7 +309,15 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
           tool_call: (m as { tool_call?: string }).tool_call,
           _is_expanded: (m as { _is_expanded?: boolean })._is_expanded,
         }
-        if (type === 'tool_result' && typeof msg.content === 'string') {
+        if (type === ManageResponseType.CREATE_CONVERSATION) {
+          router.push({
+            name: 'manageHistoryList',
+            params: {
+              conversation_id: msg.content as string,
+            },
+          })
+          emit('get-history-list')
+        } else if (type === ManageResponseType.TOOL_RESULT && typeof msg.content === 'string') {
           try {
             msg.content = JSON.parse(msg.content) as Record<string, unknown>
           } catch {
@@ -493,7 +500,7 @@ function handleSend(payload: { question: string }) {
 async function handleStop() {
   const cid = props.conversationId
   if (cid && cid !== '') {
-    await stopChatAPI({ conversation_id: cid })
+    await stopManageChatAPI({ conversation_id: cid })
   }
   isConversationLoading.value = false
 }

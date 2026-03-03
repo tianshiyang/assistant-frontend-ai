@@ -82,6 +82,15 @@ export const stopChatAPI = (data: { conversation_id: string }) => {
   })
 }
 
+// 管理端停止与AI对话
+export const stopManageChatAPI = (data: { conversation_id: string }) => {
+  return request({
+    url: '/api/manage/ai/chat/stop',
+    method: 'POST',
+    data,
+  })
+}
+
 // 获取所有会话列表
 export const getAllConversationListAPI = (params: { type: 'skills' | 'manage' }) => {
   return request<ConversationList[]>({

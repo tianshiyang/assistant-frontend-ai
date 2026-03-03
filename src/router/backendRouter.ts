@@ -31,7 +31,7 @@ export const backendRouter = [
       },
       {
         path: '/backend/history/list/:conversation_id?',
-        name: 'historyList',
+        name: 'manageHistoryList',
         component: () => import('@/views/backend/history/index.vue'),
       },
     ],
