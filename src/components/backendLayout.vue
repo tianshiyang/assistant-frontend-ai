@@ -99,7 +99,7 @@ interface ConversationItem extends ConversationList {
 const router = useRouter()
 const route = useRoute()
 
-const isHistoryRoute = computed(() => route.path === '/backend/history/list')
+const isHistoryRoute = computed(() => route.path.includes('/backend/history/list'))
 const selectedKeys = ref<string[]>([])
 
 const conversationList = ref<ConversationItem[]>([])
@@ -243,7 +243,7 @@ getAllConversationList()
   min-height: 0;
 
   &.layout-content-full {
-    padding: 0;
+    padding-left: 0;
   }
 }
 

@@ -259,6 +259,7 @@ getAllConversationList()
   align-items: center;
   gap: 8px;
   font-size: 14px;
+  z-index: 99;
   cursor: pointer;
   &:hover {
     color: #1890ff;
