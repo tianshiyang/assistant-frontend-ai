@@ -65,6 +65,8 @@ defineProps({
   },
 })
 
+const router = useRouter()
+
 const emit = defineEmits<{
   send: [payload: { question: string; skills?: Skill[]; datasetIds?: string[] }]
   stop: []
@@ -87,6 +89,11 @@ const skillList: SkillItem[] = [
     value: Skill.WEB_SEARCH,
     icon: 'icon-aihulianwang',
   }, // 联网搜索
+  {
+    label: SKILL_LABEL[Skill.TEXT_TO_SQL],
+    value: Skill.TEXT_TO_SQL,
+    icon: 'icon-aiSQLshitu',
+  }, // 联网搜索
 ]
 
 const skillModelData = ref({
@@ -103,6 +110,12 @@ const selectSkill = (item: SkillItem) => {
     // 选择联网搜索
     selectConfig.skills = selectConfig.skills.filter(item => item !== Skill.DATASET_RETRIEVER)
     selectConfig.skills.push(Skill.WEB_SEARCH)
+    return
+  } else if (item.value === Skill.TEXT_TO_SQL) {
+    // 选择文本转SQL
+    router.push({
+      name: 'manageHistoryList',
+    })
     return
   }
 }

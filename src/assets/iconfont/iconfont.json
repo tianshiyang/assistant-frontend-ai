@@ -6,6 +6,13 @@
   "description": "",
   "glyphs": [
     {
+      "icon_id": "25426546",
+      "name": "SQL视图",
+      "font_class": "SQLshitu",
+      "unicode": "e63b",
+      "unicode_decimal": 58939
+    },
+    {
       "icon_id": "3876823",
       "name": "深度学习",
       "font_class": "shenduxuexi",

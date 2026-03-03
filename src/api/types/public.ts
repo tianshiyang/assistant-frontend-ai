@@ -1,12 +1,12 @@
 export enum Skill {
   DATASET_RETRIEVER = 'dataset_retriever',
   WEB_SEARCH = 'web_search',
-  // TEXT_TO_SQL = 'text_to_sql',
+  TEXT_TO_SQL = 'text_to_sql',
 }
 
 export const SKILL_LABEL = {
   [Skill.DATASET_RETRIEVER]: '知识库检索',
-  // [Skill.TEXT_TO_SQL]: '文本转SQL',
+  [Skill.TEXT_TO_SQL]: '文本转SQL',
   [Skill.WEB_SEARCH]: '联网搜索',
 } as const
 
