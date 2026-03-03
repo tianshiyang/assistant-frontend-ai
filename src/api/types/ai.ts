@@ -31,11 +31,12 @@ export enum ManageResponseType {
   ERROR = 'error',
   TOOL_CALL = 'tool_call',
   TOOL_RESULT = 'tool_result',
+  TOOL_PARAMS = 'tool_params',
   SAVE_TOKEN = 'save_token',
   GENERATE = 'generate',
   CREATE_CONVERSATION = 'create_conversation',
-  REWRITE_QUESTION_START = 'rewrite_question_START',
-  REWRITE_QUESTION_END = 'rewrite_question_END',
+  REWRITE_QUESTION_START = 'rewrite_question_start',
+  REWRITE_QUESTION_END = 'rewrite_question_end',
 }
 
 /** 管理端历史消息单条（/api/ai/conversation/messages 返回的扁平结构） */

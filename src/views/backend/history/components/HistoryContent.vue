@@ -23,7 +23,9 @@
               <div class="ai-answer">
                 <template v-for="(item, idx) in round.messages" :key="idx">
                   <div
-                    v-if="item.type === 'ping' && isLastPing(round, idx)"
+                    v-if="
+                      item.type === ManageResponseType.PING && idx === round.messages.length - 1
+                    "
                     class="loading-wrap-inline"
                   >
                     <img
@@ -32,19 +34,44 @@
                       alt="加载中"
                     />
                   </div>
-                  <div v-else-if="item.type === 'generate'" class="generate-block">
-                    <MdPreview :model-value="String(item.content || '')" />
+                  <div v-else-if="item.type === ManageResponseType.GENERATE" class="generate-block">
+                    <div v-if="JSON.parse(item.content as string).type === 'table'">
+                      <a-table
+                        :columns="JSON.parse(item.content as string).columns"
+                        :data-source="JSON.parse(item.content as string).dataSource"
+                        :pagination="false"
+                      ></a-table>
+                    </div>
+                    <div v-else>
+                      <MdPreview :model-value="String(item.content)" />
+                    </div>
                   </div>
                   <div
-                    v-else-if="item.type === 'tool_call' || item.type === 'tool'"
+                    v-else-if="item.type === ManageResponseType.REWRITE_QUESTION_START"
+                    class="tool-node"
+                  >
+                    正在重写问题...
+                  </div>
+                  <div
+                    v-else-if="item.type === ManageResponseType.REWRITE_QUESTION_END"
+                    class="tool-node"
+                  >
+                    重写问题完成：{{ item.content }}
+                  </div>
+
+                  <div
+                    v-else-if="item.type === ManageResponseType.TOOL_CALL || item.type === 'tool'"
                     class="tool-node"
                   >
                     AI准备调用工具：{{ item.tool_call || item.content }}
                   </div>
-                  <div v-else-if="item.type === 'get_tools'" class="tool-node">
-                    正在获取所有可用工具
+                  <div v-else-if="item.type === ManageResponseType.TOOL_PARAMS" class="tool-result">
+                    <div class="message-info">工具参数：</div>
+                    <div class="message-info-item">
+                      <pre>{{ item.content }}</pre>
+                    </div>
                   </div>
-                  <div v-else-if="item.type === 'tool_result'" class="tool-result">
+                  <div v-else-if="item.type === ManageResponseType.TOOL_RESULT" class="tool-result">
                     <div
                       v-show="!getExpanded(item)"
                       class="expand-icon"
@@ -61,11 +88,13 @@
                     </div>
                     <div class="message-info">工具执行结果：</div>
                     <div v-if="getExpanded(item)" class="message-info-item">
-                      <pre>{{ formatContent(item.content) }}</pre>
+                      <pre>{{ item.content }}</pre>
                     </div>
                   </div>
-                  <div v-else-if="item.type === 'stop'" class="task-stop-node">任务已停止</div>
-                  <div v-else-if="item.type === 'save_token'" class="message-info-block">
+                  <div
+                    v-else-if="item.type === ManageResponseType.SAVE_TOKEN"
+                    class="message-info-block"
+                  >
                     <div class="message-info">本次对话token消耗情况如下</div>
                     <div v-if="tokenContent(item)" class="message-info-items">
                       <div class="message-info-item">
@@ -79,22 +108,22 @@
                       </div>
                     </div>
                   </div>
-                  <div v-else-if="item.type === 'error'" class="error-block">
-                    {{ formatContent(item.content) }}
+                  <div v-else-if="item.type === ManageResponseType.ERROR" class="error-block">
+                    {{ item.content }}
                   </div>
                   <span
                     v-else-if="
                       [
-                        'done',
-                        'create_conversation',
-                        'rewrite_question_START',
-                        'rewrite_question_END',
-                      ].includes(item.type)
+                        ManageResponseType.DONE,
+                        ManageResponseType.CREATE_CONVERSATION,
+                        ManageResponseType.REWRITE_QUESTION_START,
+                        ManageResponseType.REWRITE_QUESTION_END,
+                      ].includes(item.type as ManageResponseType)
                     "
                     class="hide"
                   ></span>
                   <div v-else class="message-info-block">
-                    {{ formatContent(item.content) }}
+                    {{ item.content }}
                   </div>
                 </template>
               </div>
@@ -119,7 +148,11 @@ import { nextTick, ref, watch } from 'vue'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
-import type { ConversationHistory, ManageConversationMessage } from '@/api/types/ai'
+import {
+  ManageResponseType,
+  type ConversationHistory,
+  type ManageConversationMessage,
+} from '@/api/types/ai'
 import type { StreamResponse } from '@/api/types'
 import { getConversationHistoryAPI, manageChatAPI, stopChatAPI } from '@/api/module/ai'
 import { ChatResponseType } from '@/api/types/public'
@@ -158,12 +191,6 @@ interface DisplayRound {
 }
 
 const displayRounds = ref<DisplayRound[]>([])
-
-function formatContent(c: string | Record<string, unknown> | undefined): string {
-  if (c == null) return ''
-  if (typeof c === 'string') return c
-  return JSON.stringify(c, null, 2)
-}
 
 function tokenContent(item: DisplayMessage): Record<string, number> | null {
   const c = item.content
@@ -235,17 +262,17 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
       const merged: DisplayMessage[] = []
       let lastGen: DisplayMessage | null = null
       for (const m of current) {
-        if (m.type === 'generate') {
+        if (m.type === ManageResponseType.GENERATE) {
           const content = typeof m.content === 'string' ? m.content : String(m.content ?? '')
           if (lastGen) {
             lastGen.content = String(lastGen.content || '') + content
           } else {
-            lastGen = { type: 'generate', content, _is_expanded: m._is_expanded }
+            lastGen = { type: ManageResponseType.GENERATE, content, _is_expanded: m._is_expanded }
             merged.push(lastGen)
           }
         } else {
           lastGen = null
-          if (m.type === 'tool_result' && typeof m.content === 'string') {
+          if (m.type === ManageResponseType.TOOL_RESULT && typeof m.content === 'string') {
             try {
               merged.push({ ...m, content: JSON.parse(m.content) as Record<string, unknown> })
             } catch {
@@ -264,18 +291,18 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
 
   for (const m of list) {
     const type = String(m.type as unknown as string)
-    if (type === 'ping') {
+    if (type === ManageResponseType.PING) {
       continue
     }
-    if (type === 'create_conversation') {
+    if (type === ManageResponseType.CREATE_CONVERSATION) {
       flush()
       continue
     }
-    if (type === 'rewrite_question_END') {
+    if (type === ManageResponseType.REWRITE_QUESTION_END) {
       currentQuestion = typeof m.content === 'string' ? m.content : String(m.content ?? '')
       continue
     }
-    if (type === 'rewrite_question_START') continue
+    if (type === ManageResponseType.REWRITE_QUESTION_START) continue
     current.push({
       type,
       content: m.content,
