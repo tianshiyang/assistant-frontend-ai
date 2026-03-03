@@ -80,6 +80,11 @@ const selectConfig = reactive({
 
 const skillList: SkillItem[] = [
   {
+    label: SKILL_LABEL[Skill.TEXT_TO_SQL],
+    value: Skill.TEXT_TO_SQL,
+    icon: 'icon-aiSQLshitu',
+  }, // 文本转SQL
+  {
     label: SKILL_LABEL[Skill.DATASET_RETRIEVER],
     value: Skill.DATASET_RETRIEVER,
     icon: 'icon-aizhishiku',
@@ -88,11 +93,6 @@ const skillList: SkillItem[] = [
     label: SKILL_LABEL[Skill.WEB_SEARCH],
     value: Skill.WEB_SEARCH,
     icon: 'icon-aihulianwang',
-  }, // 联网搜索
-  {
-    label: SKILL_LABEL[Skill.TEXT_TO_SQL],
-    value: Skill.TEXT_TO_SQL,
-    icon: 'icon-aiSQLshitu',
   }, // 联网搜索
 ]
 

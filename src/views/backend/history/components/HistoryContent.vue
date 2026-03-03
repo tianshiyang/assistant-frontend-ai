@@ -69,7 +69,24 @@
                     v-else-if="item.type === ManageResponseType.TOOL_CALL || item.type === 'tool'"
                     class="tool-node"
                   >
-                    AI准备调用工具：{{ item.tool_call || item.content }}
+                    <template v-if="item.content === 'sql_db_query_checker'">
+                      正在检查SQL语句...
+                    </template>
+                    <template v-else-if="item.content === 'sql_db_list_tables'">
+                      正在获取所有可用表名...
+                    </template>
+                    <template v-else-if="item.content === 'sql_db_schema'">
+                      正在获取数据库表结构信息...
+                    </template>
+                    <template v-else-if="item.content === 'sql_db_query_executor'">
+                      正在执行SQL语句...
+                    </template>
+                    <template v-else-if="item.content === 'sql_db_query'">
+                      正在执行SQL语句...
+                    </template>
+                    <template v-else>
+                      AI准备调用工具：{{ item.tool_call || item.content }}
+                    </template>
                   </div>
                   <div v-else-if="item.type === ManageResponseType.TOOL_PARAMS" class="tool-result">
                     <div class="message-info">工具参数：</div>
