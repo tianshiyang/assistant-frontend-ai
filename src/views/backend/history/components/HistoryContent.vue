@@ -58,6 +58,9 @@
                         class="echarts-container"
                       ></div>
                     </template>
+                    <template v-else-if="isTextContent(item.content)">
+                      {{ getTextContent(item.content) }}
+                    </template>
                     <template v-else>
                       <MdPreview :model-value="String(item.content)" />
                     </template>
@@ -244,6 +247,7 @@ interface StructuredContent {
   columns?: unknown[]
   dataSource?: unknown[]
   echarts_option?: unknown
+  content?: string
 }
 
 const handleInteractionAction = async (value: any) => {
@@ -366,6 +370,16 @@ function isEchartsContent(content: DisplayMessage['content']): boolean {
   return parsed?.type === 'echarts' && !!parsed.echarts_option
 }
 
+function isTextContent(content: DisplayMessage['content']): boolean {
+  const parsed = safeParseContent(content)
+  return parsed?.type === 'text'
+}
+
+function getTextContent(content: DisplayMessage['content']): string {
+  const parsed = safeParseContent(content)
+  return parsed?.content as string
+}
+
 function getEchartsOption(content: DisplayMessage['content']): EChartsOption | null {
   const parsed = safeParseContent(content)
   if (parsed?.type === 'echarts' && parsed.echarts_option) {
@@ -433,6 +447,7 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
       } else if (type === ManageResponseType.INTERACTION_RESULT) {
         const lastRound = merged[merged.length - 1]!
         lastRound.interaction_type = JSON.parse(m.content).type as 'default' | 'approve' | 'reject'
+        continue
       } else {
         lastGen = null
         const msg: DisplayMessage = {

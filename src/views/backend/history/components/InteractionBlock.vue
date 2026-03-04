@@ -32,7 +32,7 @@
           {{ isInteractionEditing(interactionIndex) ? '完成编辑' : '编辑' }}
         </a-button>
       </div>
-      <div class="interaction-actions">
+      <div v-else class="interaction-actions">
         <a-tag :color="interactionType === 'reject' ? 'red' : 'green'" size="small">
           {{ interactionType === 'approve' ? '已同意' : '已拒绝' }}
         </a-tag>
