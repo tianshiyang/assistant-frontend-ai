@@ -52,7 +52,7 @@ const handleNewChat = () => {
   selectedConversationId.value = ''
   router.push({
     name: 'manageHistoryList',
-    params: { conversation_id: undefined },
+    // params: { conversation_id: undefined },
   })
 }
 

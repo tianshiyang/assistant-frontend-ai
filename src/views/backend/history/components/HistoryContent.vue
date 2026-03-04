@@ -2,9 +2,27 @@
   <div class="history-content">
     <div class="history-chat">
       <div ref="messagesBoxRef" class="messages-box">
-        <template v-if="conversationId === null && !displayRounds.length">
+        <template v-if="!conversationId">
           <div class="history-content-placeholder">
-            你可以向我询问数据相关的问题，比如：系统中可用的商品有哪些
+            你可以向我询问数据相关的问题，比如：
+            <p>
+              <a-button type="primary" @click="handleAsk('系统中可用的商品有哪些')">
+                系统中可用的商品有哪些
+              </a-button>
+            </p>
+            <p>
+              <a-button type="primary" @click="handleAsk('王宝强的商品售卖情况如何')">
+                王宝强的商品售卖情况如何
+              </a-button>
+            </p>
+            <p>
+              <a-button
+                type="primary"
+                @click="handleAsk('帮我生成一个各个销售所占销售额比例的图表')"
+              >
+                帮我生成一个各个销售所占销售额比例的图表
+              </a-button>
+            </p>
           </div>
         </template>
         <template v-else>
@@ -219,6 +237,10 @@ const emit = defineEmits<{
   'conversation-created': [conversationId: string]
   'get-history-list': []
 }>()
+
+const handleAsk = (question: string) => {
+  handleSend({ question })
+}
 
 const messagesBoxRef = ref<HTMLDivElement>()
 const loading = ref(false)
@@ -643,10 +665,13 @@ watch(
   height: 100%;
   font-size: 18px;
   display: flex;
+  flex-direction: column;
   align-items: center;
-  justify-content: center;
   color: #333;
   padding: 24px;
+  p {
+    margin-bottom: 0;
+  }
 }
 
 .history-chat {
