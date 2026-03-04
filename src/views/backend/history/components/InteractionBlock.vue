@@ -24,13 +24,13 @@
         >
           拒绝
         </a-button>
-        <a-button
+        <!-- <a-button
           size="small"
           class="interaction-btn"
           @click="toggleInteractionEdit(interactionIndex, interaction)"
         >
           {{ isInteractionEditing(interactionIndex) ? '完成编辑' : '编辑' }}
-        </a-button>
+        </a-button> -->
       </div>
       <div v-else class="interaction-actions">
         <a-tag :color="interactionType === 'reject' ? 'red' : 'green'" size="small">
@@ -132,17 +132,17 @@ function handleReject(index: number, interaction: unknown) {
   emitInteractionAction('reject', index, interaction)
 }
 
-function toggleInteractionEdit(index: number, interaction: unknown) {
-  const state = editState.value[index]
-  if (state) {
-    state.editing = !state.editing
-  } else {
-    editState.value[index] = {
-      editing: true,
-      text: buildDisplayText(interaction),
-    }
-  }
-}
+// function toggleInteractionEdit(index: number, interaction: unknown) {
+//   const state = editState.value[index]
+//   if (state) {
+//     state.editing = !state.editing
+//   } else {
+//     editState.value[index] = {
+//       editing: true,
+//       text: buildDisplayText(interaction),
+//     }
+//   }
+// }
 </script>
 
 <style scoped lang="scss">
