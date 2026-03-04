@@ -9,9 +9,10 @@
         :value="getInteractionText(interactionIndex, interaction)"
         :auto-size="{ minRows: 3, maxRows: 10 }"
         :readonly="!isInteractionEditing(interactionIndex)"
+        :disabled="interactionType !== 'default'"
         @update:value="(val: string) => updateInteractionText(interactionIndex, val, interaction)"
       />
-      <div class="interaction-actions">
+      <div v-if="interactionType === 'default'" class="interaction-actions">
         <a-button type="primary" size="small" @click="handleAgree(interactionIndex, interaction)">
           同意
         </a-button>
@@ -31,6 +32,11 @@
           {{ isInteractionEditing(interactionIndex) ? '完成编辑' : '编辑' }}
         </a-button>
       </div>
+      <div class="interaction-actions">
+        <a-tag :color="interactionType === 'reject' ? 'red' : 'green'" size="small">
+          {{ interactionType === 'approve' ? '已同意' : '已拒绝' }}
+        </a-tag>
+      </div>
     </div>
   </div>
 </template>
@@ -46,6 +52,7 @@ const props = defineProps<{
   messageIndex: number
   content: unknown
   message_id: string
+  interactionType: 'default' | 'approve' | 'reject'
 }>()
 
 interface InteractionEditState {

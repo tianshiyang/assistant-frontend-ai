@@ -41,6 +41,7 @@
                     :message-index="idx"
                     :content="item.content"
                     :message_id="item.message_id"
+                    :interaction-type="item.interaction_type"
                     @manage-interaction-action="handleInteractionAction"
                   />
                   <div v-else-if="item.type === ManageResponseType.GENERATE" class="generate-block">
@@ -222,6 +223,7 @@ const isConversationLoading = ref(false)
 
 interface DisplayMessage {
   message_id: string
+  interaction_type: 'default' | 'approve' | 'reject'
   type: string
   content: string | Record<string, unknown>
   tool_call?: string
@@ -283,6 +285,7 @@ function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
       tool_call: event.tool_call,
       _is_expanded: event._is_expanded,
       message_id: event.message_id,
+      interaction_type: 'default',
     })
   }
   if (event.type === ChatResponseType.PING) {
@@ -419,9 +422,17 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
         if (lastGen) {
           lastGen.content = String(lastGen.content || '') + str
         } else {
-          lastGen = { type: ManageResponseType.GENERATE, content: str, message_id: m.message_id }
+          lastGen = {
+            type: ManageResponseType.GENERATE,
+            content: str,
+            message_id: m.message_id,
+            interaction_type: 'default',
+          }
           merged.push(lastGen)
         }
+      } else if (type === ManageResponseType.INTERACTION_RESULT) {
+        const lastRound = merged[merged.length - 1]!
+        lastRound.interaction_type = JSON.parse(m.content).type as 'default' | 'approve' | 'reject'
       } else {
         lastGen = null
         const msg: DisplayMessage = {
@@ -430,6 +441,7 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
           message_id: m.message_id,
           tool_call: (m as { tool_call?: string }).tool_call,
           _is_expanded: (m as { _is_expanded?: boolean })._is_expanded,
+          interaction_type: 'default',
         }
         if (type === ManageResponseType.CREATE_CONVERSATION) {
           router.push({
@@ -474,6 +486,7 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
               content,
               _is_expanded: m._is_expanded,
               message_id: m.message_id,
+              interaction_type: 'default',
             }
             merged.push(lastGen)
           }
@@ -516,6 +529,7 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
       tool_call: m.tool_call,
       _is_expanded: m._is_expanded,
       message_id: m.message_id,
+      interaction_type: 'default',
     })
   }
   flush()

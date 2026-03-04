@@ -35,6 +35,7 @@ export enum ManageResponseType {
   SAVE_TOKEN = 'save_token',
   GENERATE = 'generate',
   INTERACTION = 'interaction',
+  INTERACTION_RESULT = 'interaction_result',
   CREATE_CONVERSATION = 'create_conversation',
   REWRITE_QUESTION_START = 'rewrite_question_start',
   REWRITE_QUESTION_END = 'rewrite_question_end',
