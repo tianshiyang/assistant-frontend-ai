@@ -54,12 +54,12 @@
             <span>订单列表</span>
           </a-menu-item>
         </a-menu-item-group>
-        <a-menu-item-group title="历史会话">
+        <a-menu-item-group title="后台Agent助手">
           <a-menu-item key="/backend/history/list">
             <template #icon>
-              <ClockCircleOutlined />
+              <AndroidOutlined />
             </template>
-            <span>历史会话</span>
+            <span>后台Agent助手</span>
           </a-menu-item>
         </a-menu-item-group>
       </a-menu>
@@ -84,7 +84,7 @@ import {
   SwapOutlined,
   CarOutlined,
   AccountBookOutlined,
-  ClockCircleOutlined,
+  AndroidOutlined,
 } from '@ant-design/icons-vue'
 import { message } from 'ant-design-vue'
 import UserInfo from './userInfo.vue'
