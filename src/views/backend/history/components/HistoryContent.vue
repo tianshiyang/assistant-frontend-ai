@@ -301,6 +301,9 @@ function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
     } else {
       push()
     }
+  } else if (event.type === ChatResponseType.INTERACTION_RESULT) {
+    const prev = round.messages[round.messages.length - 1]
+    prev!.interaction_type = JSON.parse(event.content).type as 'default' | 'approve' | 'reject'
   } else {
     push()
   }

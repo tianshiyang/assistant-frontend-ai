@@ -28,6 +28,7 @@ export enum ChatResponseType {
   SAVE_TOKEN = 'save_token',
   GENERATE = 'generate',
   CREATE_CONVERSATION = 'create_conversation',
+  INTERACTION_RESULT = 'interaction_result',
 }
 
 export const CHAT_RESPONSE_TYPE_LABEL: Record<ChatResponseType, string> = {
@@ -41,4 +42,5 @@ export const CHAT_RESPONSE_TYPE_LABEL: Record<ChatResponseType, string> = {
   [ChatResponseType.GENERATE]: '正在生成内容',
   [ChatResponseType.CREATE_CONVERSATION]: '正在生成会话',
   [ChatResponseType.STOP]: '任务已停止',
+  [ChatResponseType.INTERACTION_RESULT]: '交互结果',
 }
