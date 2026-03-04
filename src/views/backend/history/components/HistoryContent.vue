@@ -191,6 +191,7 @@ import type { StreamResponse } from '@/api/types'
 import {
   getConversationHistoryAPI,
   manageChatAPI,
+  manageChatInteractionContinueAPI,
   manageTextToSqlInteractionAPI,
   stopManageChatAPI,
 } from '@/api/module/ai'
@@ -243,7 +244,7 @@ interface StructuredContent {
   echarts_option?: unknown
 }
 
-const handleInteractionAction = (value: any) => {
+const handleInteractionAction = async (value: any) => {
   let data = null
   if (value.action === 'approve') {
     // 同意
@@ -251,11 +252,84 @@ const handleInteractionAction = (value: any) => {
       type: value.action,
     }
   }
-  manageTextToSqlInteractionAPI({
+  if (value.action === 'reject') {
+    // 拒绝
+    data = {
+      type: value.action,
+    }
+  }
+  await manageTextToSqlInteractionAPI({
     conversation_id: props.conversationId!,
-    resume: JSON.stringify(data),
+    resume: data,
     message_id: value.message_id,
   })
+  manageChatInteractionContinue(value.roundIndex)
+}
+
+/** 将流式事件合并到指定轮次（manageChatAPI / manageChatInteractionContinueAPI 共用） */
+function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
+  if (event.type === ChatResponseType.DONE) {
+    loadMessages()
+  }
+  if (event.type === ChatResponseType.CREATE_CONVERSATION) {
+    const newId = typeof event.content === 'string' ? event.content : ''
+    if (newId) emit('conversation-created', newId)
+    return
+  }
+  const push = () => {
+    round.messages.push({
+      type: event.type,
+      content: event.content,
+      tool_call: event.tool_call,
+      _is_expanded: event._is_expanded,
+      message_id: event.message_id,
+    })
+  }
+  if (event.type === ChatResponseType.PING) {
+    push()
+  } else if (event.type === ChatResponseType.GENERATE) {
+    const prev = round.messages[round.messages.length - 1]
+    if (prev?.type === 'generate') {
+      prev.content = String(prev.content || '') + String(event.content || '')
+    } else {
+      push()
+    }
+  } else {
+    push()
+  }
+  if ([ChatResponseType.DONE, ChatResponseType.STOP, ChatResponseType.ERROR].includes(event.type)) {
+    isConversationLoading.value = false
+  }
+  if (event.type === ChatResponseType.DONE) {
+    loadMessages()
+  }
+  scrollToBottom()
+}
+
+/** 人机交互后继续流式对话，将流式数据追加到指定轮次的消息后面 */
+function manageChatInteractionContinue(roundIndex: number) {
+  const cid = props.conversationId
+  if (!cid || cid === '') return
+  const targetRound = displayRounds.value[roundIndex]
+  if (!targetRound) return
+
+  isConversationLoading.value = true
+  manageChatInteractionContinueAPI(
+    { conversation_id: cid },
+    {
+      onmessage: (event: StreamResponse) => {
+        const round = displayRounds.value[roundIndex]
+        if (!round) return
+        applyStreamEventToRound(round, event)
+      },
+      onerror: () => {
+        isConversationLoading.value = false
+      },
+      onclose: () => {
+        isConversationLoading.value = false
+      },
+    }
+  )
 }
 
 function safeParseContent(content: DisplayMessage['content']): StructuredContent | null {
@@ -493,53 +567,7 @@ function handleSend(payload: { question: string }) {
       onmessage: (event: StreamResponse) => {
         const last = displayRounds.value[displayRounds.value.length - 1]
         if (!last) return
-
-        if (event.type === ChatResponseType.DONE) {
-          loadMessages()
-        }
-
-        if (event.type === ChatResponseType.CREATE_CONVERSATION) {
-          const newId = typeof event.content === 'string' ? event.content : ''
-          if (newId) emit('conversation-created', newId)
-          return
-        }
-
-        const push = () => {
-          last.messages.push({
-            type: event.type,
-            content: event.content,
-            tool_call: event.tool_call,
-            _is_expanded: event._is_expanded,
-            message_id: event.message_id,
-          })
-        }
-
-        if (event.type === ChatResponseType.PING) {
-          push()
-        }
-
-        if (event.type === ChatResponseType.GENERATE) {
-          const prev = last.messages[last.messages.length - 1]
-          if (prev?.type === 'generate') {
-            prev.content = String(prev.content || '') + String(event.content || '')
-          } else {
-            push()
-          }
-        } else {
-          push()
-        }
-
-        if (
-          [ChatResponseType.DONE, ChatResponseType.STOP, ChatResponseType.ERROR].includes(
-            event.type
-          )
-        ) {
-          isConversationLoading.value = false
-        }
-        if (event.type === ChatResponseType.DONE) {
-          loadMessages()
-        }
-        scrollToBottom()
+        applyStreamEventToRound(last, event)
       },
       onerror: () => {
         isConversationLoading.value = false

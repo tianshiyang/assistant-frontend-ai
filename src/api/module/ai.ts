@@ -139,3 +139,26 @@ export const manageTextToSqlInteractionAPI = (data: {
     data,
   })
 }
+
+// 人机交互后继续流式对话
+export interface ManageChatInteractionContinuePayload {
+  conversation_id: string
+}
+
+export const manageChatInteractionContinueAPI = (
+  data: ManageChatInteractionContinuePayload,
+  options?: {
+    onmessage?: (event: StreamResponse) => void
+    onerror?: (error: Error) => void
+    onclose?: () => void
+  }
+) => {
+  return streamRequest({
+    url: '/api/manage/ai/chat/interaction/continue',
+    method: 'POST',
+    data,
+    onmessage: options?.onmessage,
+    onerror: options?.onerror,
+    onclose: options?.onclose,
+  })
+}
