@@ -1,14 +1,14 @@
 <template>
   <template v-if="!conversation_id">
     <NewChat
-      :is-conversation-loading="isConversationLoading"
+      :is-conversation-loading="chatStore.isConversationLoading"
       @send="handleSend"
       @stop="handleStopConversation"
     />
   </template>
   <template v-else>
     <ChatView
-      :is-conversation-loading="isConversationLoading"
+      :is-conversation-loading="chatStore.isConversationLoading"
       :messages="conversationHistory"
       :questions="questions"
       @send="handleSend"
@@ -35,9 +35,12 @@ import ChatView from './components/chatView.vue'
 import { margeAiMessage } from './utils/margeAiMessage'
 import dayjs from 'dayjs'
 import emitter from '@/utils/eventBus'
+import { useChatStore } from '@/stores/chatStore'
 
 const route = useRoute()
 const router = useRouter()
+
+const chatStore = useChatStore()
 
 // 会话id
 const conversation_id = ref<string>(route.params.conversation_id as string)
@@ -48,15 +51,12 @@ const conversationHistory = ref<ConversationHistory[]>([])
 // 用户可能询问的问题
 const questions = ref<string[]>([])
 
-// 是否正在与AI对话
-const isConversationLoading = ref(false)
-
 // 停止与AI对话
 const handleStopConversation = async () => {
   await stopChatAPI({
     conversation_id: conversation_id.value as string,
   })
-  isConversationLoading.value = false
+  chatStore.setIsConversationLoading(false)
 }
 
 // 创建回话
@@ -85,7 +85,7 @@ const handleSend = async (
   payload: { question: string; skills?: Skill[]; datasetIds?: string[] },
   newChat: boolean = false
 ) => {
-  isConversationLoading.value = true
+  chatStore.setIsConversationLoading(true)
   questions.value = []
   conversationHistory.value.push({
     conversation_id: conversation_id.value,
@@ -127,13 +127,6 @@ const handleSend = async (
         const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
         lastMessage.messages.push(event)
         conversationHistory.value = margeAiMessage(conversationHistory.value)
-        if (
-          [ChatResponseType.DONE, ChatResponseType.STOP, ChatResponseType.ERROR].includes(
-            event.type
-          )
-        ) {
-          isConversationLoading.value = false
-        }
         if (event.type === ChatResponseType.DONE) {
           // 生成用户可能询问的问题
           getUserPossibleQuestionsAPI({
@@ -148,6 +141,7 @@ const handleSend = async (
             })
             emitter.emit('update-conversation-history')
           }
+          chatStore.setIsConversationLoading(false)
         }
       }
     },
@@ -167,7 +161,7 @@ initGetHistory()
 watch(
   () => route.params.conversation_id,
   () => {
-    if (isConversationLoading.value) {
+    if (chatStore.isConversationLoading) {
       return
     }
     conversationHistory.value = []

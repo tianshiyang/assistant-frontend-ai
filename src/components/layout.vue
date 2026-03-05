@@ -36,6 +36,7 @@
           <a-menu-item
             v-for="item in conversationList"
             :key="'/chat/' + item.id"
+            :disabled="chatStore.isConversationLoading"
             @mouseenter="item.isHover = true"
             @mouseleave="item.isHover = false"
           >
@@ -76,10 +77,13 @@ import { deleteConversationAPI, getAllConversationListAPI } from '@/api/module/a
 import type { ConversationList } from '@/api/types/ai'
 import { DeleteOutlined, ExclamationCircleOutlined, SwapOutlined } from '@ant-design/icons-vue'
 import emitter from '@/utils/eventBus'
+import { useChatStore } from '@/stores/chatStore'
 
 interface ConversationItem extends ConversationList {
   isHover: boolean
 }
+
+const chatStore = useChatStore()
 
 const router = useRouter()
 const route = useRoute()
