@@ -50,17 +50,13 @@ export interface HistoryItem {
   isHover?: boolean
 }
 
-interface Emits {
-  (e: 'new-chat'): void
-  (e: 'select', item: HistoryItem): void
-  (e: 'delete', item: HistoryItem): void
-}
-
-const emit = defineEmits<Emits>()
-
 const historyList = ref<HistoryItem[]>([])
 const selectedKeys = ref<string[]>([])
 const loading = ref(false)
+
+const route = useRoute()
+
+const router = useRouter()
 
 function mapConversationToHistory(list: ConversationList[]): HistoryItem[] {
   return list.map(item => ({
@@ -82,13 +78,17 @@ async function loadHistoryList() {
 
 const handleNewChat = () => {
   selectedKeys.value = []
-  emit('new-chat')
+  router.push({
+    name: 'manageHistoryList',
+  })
 }
 
 const handleSelect = ({ key }: { key: string }) => {
   selectedKeys.value = [key]
-  const item = historyList.value.find(i => i.id === key)
-  if (item) emit('select', item)
+  router.push({
+    name: 'manageHistoryList',
+    params: { conversation_id: key },
+  })
 }
 
 const handleDelete = (item: HistoryItem) => {
@@ -100,17 +100,29 @@ const handleDelete = (item: HistoryItem) => {
     onOk: async () => {
       await deleteConversationAPI({ conversation_id: item.id })
       await loadHistoryList()
-      emit('delete', item)
+      router.push({
+        name: 'manageHistoryList',
+      })
       message.success('删除成功')
     },
   })
 }
 
+watch(
+  () => route.params.conversation_id,
+  () => {
+    selectedKeys.value = route.params.conversation_id
+      ? [route.params.conversation_id as string]
+      : []
+  },
+  {
+    immediate: true,
+  }
+)
+
 loadHistoryList()
 
 defineExpose({
-  historyList,
-  selectedKeys,
   loadHistoryList,
 })
 </script>

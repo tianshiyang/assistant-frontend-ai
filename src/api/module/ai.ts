@@ -48,8 +48,8 @@ export interface ChatPayloadRequest {
 
 // 管理端对话请求
 export interface ManageChatPayloadRequest {
-  conversation_id?: string
-  query: string
+  conversation_id: string
+  question: string
 }
 
 // 与AI进行对话

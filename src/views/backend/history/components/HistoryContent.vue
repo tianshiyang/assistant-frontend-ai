@@ -6,6 +6,14 @@
           <div class="history-content-placeholder">
             你可以向我询问数据相关的问题，比如：
             <p>
+              <a-button
+                type="primary"
+                @click="handleAsk('帮我生成一个各个销售所占销售额比例的图表')"
+              >
+                帮我生成一个各个销售所占销售额比例的图表
+              </a-button>
+            </p>
+            <p>
               <a-button type="primary" @click="handleAsk('系统中可用的商品有哪些')">
                 系统中可用的商品有哪些
               </a-button>
@@ -13,14 +21,6 @@
             <p>
               <a-button type="primary" @click="handleAsk('王宝强的商品售卖情况如何')">
                 王宝强的商品售卖情况如何
-              </a-button>
-            </p>
-            <p>
-              <a-button
-                type="primary"
-                @click="handleAsk('帮我生成一个各个销售所占销售额比例的图表')"
-              >
-                帮我生成一个各个销售所占销售额比例的图表
               </a-button>
             </p>
           </div>
@@ -169,7 +169,6 @@
                     v-else-if="
                       [
                         ManageResponseType.DONE,
-                        ManageResponseType.CREATE_CONVERSATION,
                         ManageResponseType.REWRITE_QUESTION_START,
                         ManageResponseType.REWRITE_QUESTION_END,
                       ].includes(item.type as ManageResponseType)
@@ -187,8 +186,8 @@
       </div>
       <div class="input-box">
         <HistorySendMessage
-          :is-conversation-loading="isConversationLoading"
-          :input-placeholder="inputPlaceholder"
+          :is-conversation-loading="chatStore.isConversationLoading"
+          input-placeholder="请输入你的问题"
           @send="handleSend"
           @stop="handleStop"
         />
@@ -198,19 +197,21 @@
 </template>
 
 <script lang="ts" setup>
-import { nextTick, ref, watch } from 'vue'
+import { nextTick, ref } from 'vue'
 import * as echarts from 'echarts'
 import type { EChartsOption } from 'echarts'
 import { MdPreview } from 'md-editor-v3'
 import 'md-editor-v3/lib/preview.css'
 import { DownOutlined, UpOutlined } from '@ant-design/icons-vue'
 import {
+  ConversationType,
   ManageResponseType,
   type ConversationHistory,
   type ManageConversationMessage,
 } from '@/api/types/ai'
 import type { StreamResponse } from '@/api/types'
 import {
+  createConversationAPI,
   getConversationHistoryAPI,
   manageChatAPI,
   manageChatInteractionContinueAPI,
@@ -220,23 +221,17 @@ import {
 import { ChatResponseType } from '@/api/types/public'
 import HistorySendMessage from './HistorySendMessage.vue'
 import InteractionBlock from './InteractionBlock.vue'
+import { useChatStore } from '@/stores/chatStore'
 
-const props = withDefaults(
-  defineProps<{
-    /** null = 仅占位；'' = 新会话可发消息；string = 已选会话 id */
-    conversationId: string | null
-    /** 底部输入框占位文案 */
-    inputPlaceholder?: string
-  }>(),
-  {
-    inputPlaceholder: '请输入你的问题',
-  }
-)
+const route = useRoute()
 
 const emit = defineEmits<{
-  'conversation-created': [conversationId: string]
-  'get-history-list': []
+  (e: 'refresh-history-list'): void
 }>()
+
+const conversationId = computed(() => {
+  return route.params.conversation_id as string
+})
 
 const handleAsk = (question: string) => {
   handleSend({ question })
@@ -244,7 +239,8 @@ const handleAsk = (question: string) => {
 
 const messagesBoxRef = ref<HTMLDivElement>()
 const loading = ref(false)
-const isConversationLoading = ref(false)
+
+const chatStore = useChatStore()
 
 interface DisplayMessage {
   message_id: string
@@ -287,7 +283,7 @@ const handleInteractionAction = async (value: any) => {
     }
   }
   await manageTextToSqlInteractionAPI({
-    conversation_id: props.conversationId!,
+    conversation_id: conversationId.value,
     resume: data,
     message_id: value.message_id,
   })
@@ -296,14 +292,6 @@ const handleInteractionAction = async (value: any) => {
 
 /** 将流式事件合并到指定轮次（manageChatAPI / manageChatInteractionContinueAPI 共用） */
 function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
-  if (event.type === ChatResponseType.DONE) {
-    loadMessages()
-  }
-  if (event.type === ChatResponseType.CREATE_CONVERSATION) {
-    const newId = typeof event.content === 'string' ? event.content : ''
-    if (newId) emit('conversation-created', newId)
-    return
-  }
   const push = () => {
     round.messages.push({
       type: event.type,
@@ -330,7 +318,7 @@ function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
     push()
   }
   if ([ChatResponseType.DONE, ChatResponseType.STOP, ChatResponseType.ERROR].includes(event.type)) {
-    isConversationLoading.value = false
+    chatStore.setIsConversationLoading(false)
   }
   if (event.type === ChatResponseType.DONE) {
     loadMessages()
@@ -340,12 +328,11 @@ function applyStreamEventToRound(round: DisplayRound, event: StreamResponse) {
 
 /** 人机交互后继续流式对话，将流式数据追加到指定轮次的消息后面 */
 function manageChatInteractionContinue(roundIndex: number) {
-  const cid = props.conversationId
-  if (!cid || cid === '') return
+  const cid = conversationId.value
   const targetRound = displayRounds.value[roundIndex]
   if (!targetRound) return
 
-  isConversationLoading.value = true
+  chatStore.setIsConversationLoading(true)
   manageChatInteractionContinueAPI(
     { conversation_id: cid },
     {
@@ -355,10 +342,10 @@ function manageChatInteractionContinue(roundIndex: number) {
         applyStreamEventToRound(round, event)
       },
       onerror: () => {
-        isConversationLoading.value = false
+        chatStore.setIsConversationLoading(false)
       },
       onclose: () => {
-        isConversationLoading.value = false
+        chatStore.setIsConversationLoading(false)
       },
     }
   )
@@ -483,15 +470,7 @@ function conversationHistoryToRounds(list: ConversationHistory[]): DisplayRound[
           _is_expanded: (m as { _is_expanded?: boolean })._is_expanded,
           interaction_type: 'default',
         }
-        if (type === ManageResponseType.CREATE_CONVERSATION) {
-          router.push({
-            name: 'manageHistoryList',
-            params: {
-              conversation_id: msg.content as string,
-            },
-          })
-          emit('get-history-list')
-        } else if (type === ManageResponseType.TOOL_RESULT && typeof msg.content === 'string') {
+        if (type === ManageResponseType.TOOL_RESULT && typeof msg.content === 'string') {
           try {
             msg.content = JSON.parse(msg.content) as Record<string, unknown>
           } catch {
@@ -554,10 +533,6 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
     if (type === ManageResponseType.PING) {
       continue
     }
-    if (type === ManageResponseType.CREATE_CONVERSATION) {
-      flush()
-      continue
-    }
     if (type === ManageResponseType.REWRITE_QUESTION_END) {
       currentQuestion = typeof m.content === 'string' ? m.content : String(m.content ?? '')
       continue
@@ -577,10 +552,10 @@ function flatToRounds(list: ManageConversationMessage[]): DisplayRound[] {
 }
 
 async function loadMessages() {
-  if (!props.conversationId || props.conversationId === '') return
+  if (!conversationId.value) return
   loading.value = true
   try {
-    const res = await getConversationHistoryAPI({ conversation_id: props.conversationId })
+    const res = await getConversationHistoryAPI({ conversation_id: conversationId.value })
     const list = Array.isArray(res) ? res : []
     // 后端与聊天页共用接口，返回 ConversationHistory[]（每轮 question + messages）
     const isConversationHistory =
@@ -603,52 +578,83 @@ function scrollToBottom() {
   })
 }
 
-function handleSend(payload: { question: string }) {
-  const cid = props.conversationId ?? ''
+async function handleConversationCreated(question: string) {
+  const res = await createConversationAPI({
+    question,
+    conversation_type: ConversationType.MANAGE,
+  })
+  router.push({
+    name: 'manageHistoryList',
+    params: {
+      conversation_id: res.id,
+    },
+  })
+  emit('refresh-history-list')
+  return res.id
+}
+
+async function handleSend(payload: { question: string }) {
+  chatStore.setIsConversationLoading(true)
+
+  let cid = conversationId.value
+  if (!cid) {
+    cid = await handleConversationCreated(payload.question)
+  }
   displayRounds.value.push({
     question: payload.question,
     messages: [],
   })
   scrollToBottom()
-  isConversationLoading.value = true
 
   manageChatAPI(
     {
-      conversation_id: cid || undefined,
-      query: payload.question,
+      conversation_id: cid,
+      question: payload.question,
     },
     {
       onmessage: (event: StreamResponse) => {
-        const last = displayRounds.value[displayRounds.value.length - 1]
-        if (!last) return
+        if (displayRounds.value.length === 0) {
+          displayRounds.value.push({
+            question: payload.question,
+            messages: [],
+          })
+        }
+        const last = displayRounds.value[displayRounds.value.length - 1]!
         applyStreamEventToRound(last, event)
       },
       onerror: () => {
-        isConversationLoading.value = false
+        chatStore.setIsConversationLoading(false)
       },
       onclose: () => {
         console.log('sse连接关闭')
-        isConversationLoading.value = false
+        chatStore.setIsConversationLoading(false)
       },
     }
   )
 }
 
 async function handleStop() {
-  const cid = props.conversationId
-  if (cid && cid !== '') {
+  const cid = conversationId.value
+  if (cid) {
     await stopManageChatAPI({ conversation_id: cid })
   }
-  isConversationLoading.value = false
+  chatStore.setIsConversationLoading(false)
 }
 
 watch(
-  () => props.conversationId,
-  id => {
-    if (id && id !== '') loadMessages()
-    else displayRounds.value = []
+  conversationId,
+  () => {
+    displayRounds.value = []
+    if (chatStore.isConversationLoading) {
+      return
+    }
+    if (conversationId.value) {
+      loadMessages()
+    }
   },
-  { immediate: true }
+  {
+    immediate: true,
+  }
 )
 </script>
 
