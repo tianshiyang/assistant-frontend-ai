@@ -1,5 +1,11 @@
 import type { StreamResponse } from './index'
 
+// 会话类型
+export enum ConversationType {
+  SKILLS = 'skills',
+  MANAGE = 'manage',
+}
+
 // 会话历史记录
 export interface ConversationHistory {
   id: string

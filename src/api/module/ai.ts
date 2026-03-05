@@ -2,7 +2,12 @@ import { streamRequest } from '@/utils/stream'
 import type { Skill } from '../types/public'
 import type { StreamResponse } from '../types'
 import { request } from '@/utils/request'
-import type { ConversationHistory, ConversationList, ManageConversationMessage } from '../types/ai'
+import type {
+  ConversationHistory,
+  ConversationList,
+  ConversationType,
+  ManageConversationMessage,
+} from '../types/ai'
 
 // 获取当前会话下的历史记录（聊天页用，按轮次）
 export const getConversationHistoryAPI = (params: { conversation_id: string }) => {
@@ -19,6 +24,18 @@ export const getConversationMessagesAPI = (params: { conversation_id: string }) 
     url: '/api/ai/conversation/messages',
     method: 'GET',
     params,
+  })
+}
+
+// 创建会话
+export const createConversationAPI = (data: {
+  question: string
+  conversation_type: ConversationType
+}) => {
+  return request<ConversationList>({
+    url: '/api/ai/conversation/create',
+    method: 'POST',
+    data,
   })
 }
 

@@ -23,13 +23,14 @@ import NewChat from './components/newChat.vue'
 import { ChatResponseType, Skill } from '@/api/types/public'
 import {
   chatAPI,
+  createConversationAPI,
   getConversationHistoryAPI,
   getUserPossibleQuestionsAPI,
   stopChatAPI,
   updataConversationNameAPI,
   type ChatPayloadRequest,
 } from '@/api/module/ai'
-import type { ConversationHistory } from '@/api/types/ai'
+import { ConversationType, type ConversationHistory } from '@/api/types/ai'
 import ChatView from './components/chatView.vue'
 import { margeAiMessage } from './utils/margeAiMessage'
 import dayjs from 'dayjs'
@@ -58,23 +59,36 @@ const handleStopConversation = async () => {
   isConversationLoading.value = false
 }
 
+// 创建回话
+const createConversation = async (payload: {
+  question: string
+  skills?: Skill[]
+  datasetIds?: string[]
+}) => {
+  const res = await createConversationAPI({
+    question: payload.question,
+    conversation_type: ConversationType.SKILLS,
+  })
+  conversation_id.value = res.id
+  emitter.emit('update-conversation-history')
+
+  router.push({
+    name: 'chat',
+    params: {
+      conversation_id: conversation_id.value,
+    },
+  })
+}
+
 // 发送问题
-const handleSend = (
+const handleSend = async (
   payload: { question: string; skills?: Skill[]; datasetIds?: string[] },
   newChat: boolean = false
 ) => {
   isConversationLoading.value = true
   questions.value = []
-  const data: ChatPayloadRequest = {
-    conversation_id: <string>conversation_id.value,
-    question: payload.question,
-    skills: payload.skills,
-  }
-  if (payload.skills?.includes(Skill.DATASET_RETRIEVER)) {
-    data.dataset_ids = payload.datasetIds
-  }
   conversationHistory.value.push({
-    conversation_id: '',
+    conversation_id: conversation_id.value,
     id: '',
     question: payload.question,
     messages: [],
@@ -85,21 +99,20 @@ const handleSend = (
     created_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
     updated_at: dayjs().format('YYYY-MM-DD HH:mm:ss'),
   })
+  if (newChat) {
+    await createConversation(payload)
+  }
+  const data: ChatPayloadRequest = {
+    conversation_id: <string>conversation_id.value,
+    question: payload.question,
+    skills: payload.skills,
+  }
+  if (payload.skills?.includes(Skill.DATASET_RETRIEVER)) {
+    data.dataset_ids = payload.datasetIds
+  }
   chatAPI(data, {
     onmessage: async event => {
-      if (event.type === ChatResponseType.CREATE_CONVERSATION) {
-        // 创建会话
-        router.push({
-          name: 'chat',
-          params: {
-            conversation_id: event.conversation_id,
-          },
-        })
-        const lastMessage = conversationHistory.value[conversationHistory.value.length - 1]!
-        lastMessage.conversation_id = event.content
-        lastMessage.id = event.message_id
-        lastMessage.conversation_id = event.content
-      } else if (
+      if (
         [
           ChatResponseType.PING,
           ChatResponseType.SAVE_TOKEN,
@@ -154,6 +167,10 @@ initGetHistory()
 watch(
   () => route.params.conversation_id,
   () => {
+    if (isConversationLoading.value) {
+      return
+    }
+    conversationHistory.value = []
     conversation_id.value = route.params.conversation_id as string
     initGetHistory()
   }
