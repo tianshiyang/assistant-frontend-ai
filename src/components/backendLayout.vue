@@ -69,6 +69,12 @@
             </template>
             <span>PDF预览标注</span>
           </a-menu-item>
+          <a-menu-item key="/backend/text/delimiting">
+            <template #icon>
+              <AndroidOutlined />
+            </template>
+            <span>文字标注</span>
+          </a-menu-item>
         </a-menu-item-group>
       </a-menu>
 

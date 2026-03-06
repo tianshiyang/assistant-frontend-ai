@@ -39,6 +39,11 @@ export const backendRouter = [
         name: 'pdfPreview',
         component: () => import('@/views/backend/documentProcessing/pdfProcessing/index.vue'),
       },
+      {
+        path: '/backend/text/delimiting',
+        name: 'textDelimiting',
+        component: () => import('@/views/backend/documentProcessing/media/index.vue'),
+      },
     ],
   },
 ]
