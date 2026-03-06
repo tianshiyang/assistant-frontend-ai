@@ -4,13 +4,23 @@
       <PreviewThumbnail />
     </div>
     <div class="preview-right">
-      <!-- PDF 预览区域 -->
+      <PreviewContent ref="previewContentRef" />
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
+import type { PreviewImageEvent } from '../type'
 import PreviewThumbnail from './previewThumbnail.vue'
+import PreviewContent from './previewContent.vue'
+import emitter from '@/utils/eventBus'
+
+const previewContentRef = ref()
+
+emitter.on('preview-image', (item: PreviewImageEvent) => {
+  console.log(item)
+  previewContentRef.value.setCurrentFileByIndex(item.index)
+})
 </script>
 
 <style scoped lang="scss">

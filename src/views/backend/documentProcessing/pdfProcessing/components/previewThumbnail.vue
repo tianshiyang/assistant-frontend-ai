@@ -2,7 +2,7 @@
   <div class="thumbnail-container">
     <RecycleScroller
       key="thumbnail-scroller"
-      v-slot="{ item }"
+      v-slot="{ item, index }"
       class="thumbnail-scroller"
       :items="list"
       :item-size="itemSize"
@@ -16,6 +16,7 @@
           class="thumbnail-img"
           loading="lazy"
           decoding="async"
+          @click="handleClick(item, index)"
         />
         <span class="thumbnail-page-no">{{ item.pageNo }}</span>
       </div>
@@ -26,9 +27,18 @@
 <script setup lang="ts">
 import { RecycleScroller } from 'vue-virtual-scroller'
 import { pdfImageList } from '@/views/backend/documentProcessing/data/pdfImageList'
+import emitter from '@/utils/eventBus'
+import type { PreviewImageEvent } from '../type'
 
 const list = pdfImageList
 const itemSize = 112
+
+const handleClick = (item: any, index: number) => {
+  emitter.emit('preview-image', {
+    pdfId: item.id,
+    index,
+  } as PreviewImageEvent)
+}
 </script>
 
 <style scoped lang="scss">
@@ -56,6 +66,7 @@ const itemSize = 112
   align-items: center;
   justify-content: flex-start;
   height: 112px;
+  cursor: pointer;
   padding: 4px 0;
   box-sizing: border-box;
 }
@@ -68,6 +79,9 @@ const itemSize = 112
   background: #fff;
   border-radius: 2px;
   box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+  &:hover {
+    box-shadow: 0 1px 2px #1890ff;
+  }
 }
 
 .thumbnail-page-no {
