@@ -62,6 +62,14 @@
             <span>后台Agent助手</span>
           </a-menu-item>
         </a-menu-item-group>
+        <a-menu-item-group title="文档处理">
+          <a-menu-item key="/backend/pdf/preview">
+            <template #icon>
+              <AndroidOutlined />
+            </template>
+            <span>PDF预览标注</span>
+          </a-menu-item>
+        </a-menu-item-group>
       </a-menu>
 
       <div class="user-info-box">

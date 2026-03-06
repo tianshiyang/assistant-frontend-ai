@@ -34,6 +34,11 @@ export const backendRouter = [
         name: 'manageHistoryList',
         component: () => import('@/views/backend/history/index.vue'),
       },
+      {
+        path: '/backend/pdf/preview',
+        name: 'pdfPreview',
+        component: () => import('@/views/backend/documentProcessing/pdfProcessing/index.vue'),
+      },
     ],
   },
 ]
