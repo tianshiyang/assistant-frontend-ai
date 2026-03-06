@@ -12,6 +12,9 @@
     >
       <div
         class="page-item"
+        :style="{
+          transform: `rotate(${rotate}deg) scale(${zoom})`,
+        }"
         @mousedown="handleMouseDown($event, item.id)"
         @mousemove="handleMouseMove($event, item.id)"
         @mouseup="handleMouseUp($event)"
@@ -50,6 +53,23 @@ import {
   pdfImageListWithAnnotations,
 } from '@/views/backend/documentProcessing/data/pdfImageList'
 import PreviewMarker from './previewMarker.vue'
+import emitter from '@/utils/eventBus'
+
+const rotate = ref(0)
+
+const zoom = ref(1)
+
+emitter.on('rotate', () => {
+  rotate.value = rotate.value + 90
+})
+
+emitter.on('zoom-in', () => {
+  zoom.value = zoom.value + 0.1
+})
+
+emitter.on('zoom-out', () => {
+  zoom.value = zoom.value - 0.1
+})
 
 const list = pdfImageList
 // 单页高度预估值（图片高度 + 上下间距），用于虚拟列表 item-size
