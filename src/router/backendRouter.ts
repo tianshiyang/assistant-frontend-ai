@@ -44,6 +44,16 @@ export const backendRouter = [
         name: 'textDelimiting',
         component: () => import('@/views/backend/documentProcessing/media/index.vue'),
       },
+      {
+        path: '/backend/video/preview',
+        name: 'videoPreview',
+        component: () => import('@/views/backend/documentProcessing/media/video.vue'),
+      },
+      {
+        path: '/backend/audio/preview',
+        name: 'audioPreview',
+        component: () => import('@/views/backend/documentProcessing/media/audio.vue'),
+      },
     ],
   },
 ]

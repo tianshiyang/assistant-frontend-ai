@@ -75,6 +75,18 @@
             </template>
             <span>文字标注</span>
           </a-menu-item>
+          <a-menu-item key="/backend/video/preview">
+            <template #icon>
+              <AndroidOutlined />
+            </template>
+            <span>视频标注</span>
+          </a-menu-item>
+          <a-menu-item key="/backend/audio/preview">
+            <template #icon>
+              <AndroidOutlined />
+            </template>
+            <span>音频标注</span>
+          </a-menu-item>
         </a-menu-item-group>
       </a-menu>
 
