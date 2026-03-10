@@ -186,7 +186,6 @@ const isSeeking = ref(false)
 /**
  * 预计算开始时间数组，便于二分
  */
-const starts = transcript.value.map(item => item.start)
 
 /**
  * =========================

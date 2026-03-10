@@ -16,6 +16,7 @@
       >
         问题
       </a-button>
+      <a-button size="small" type="primary" @click="handleEvaluation"> 评分 </a-button>
     </div>
 
     <div
@@ -29,6 +30,7 @@
 
 <script setup lang="ts">
 import { onMounted, ref } from 'vue'
+import { createEvaluation } from './createEvaluation'
 
 type LabelType = 'evidence' | 'question'
 
@@ -49,6 +51,14 @@ const props = defineProps<Props>()
 const textContainerRef = ref<HTMLDivElement>()
 const currentLabel = ref<LabelType>('evidence')
 const annotations = ref<Annotation[]>([])
+
+const handleEvaluation = () => {
+  createEvaluation({
+    taskId: '123213',
+    onCancel: () => {},
+    onConfirm: () => {},
+  })
+}
 
 const getHighlightColor = (type: LabelType) => {
   if (type === 'evidence') return 'rgba(250, 219, 120, 0.5)' // 黄色：证据
