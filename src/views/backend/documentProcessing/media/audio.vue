@@ -39,7 +39,6 @@
             :src="popUrl"
             @play="handlePlay"
             @pause="handlePause"
-            @seeking="handleSeeking"
             @seeked="handleSeeked"
             @loadedmetadata="handleLoadedMetadata"
           />
@@ -47,130 +46,102 @@
           <div class="audio-info">
             <span>当前时间：{{ formatTime(currentTime) }}</span>
             <span>当前段落：{{ activeIndex >= 0 ? activeIndex + 1 : '-' }}</span>
+            <span>浏览模式：{{ followPlayback ? '跟随播放' : '自由浏览' }}</span>
           </div>
         </div>
       </div>
 
       <!-- 转写列表容器：可滚动，监听 scroll 以区分用户手动滚动 -->
-      <div
-        ref="transcriptContainerRef"
+      <DynamicScroller
+        ref="transcriptScrollerRef"
         class="transcript-container"
-        @scroll="handleTranscriptScroll"
+        :items="transcript"
+        key-field="id"
+        :min-item-size="segmentMinSize"
+        :buffer="segmentBuffer"
+        @wheel.passive="disableFollow"
+        @touchmove.passive="disableFollow"
+        @mousedown="disableFollow"
       >
-        <!-- 每个段落：发言人、时间范围、文本；当前播放项高亮并可点击跳转 -->
-        <div
-          v-for="(item, index) in transcript"
-          :key="item.id"
-          :ref="el => setSegmentRef(el, index)"
-          class="segment"
-          :class="{ active: index === activeIndex }"
-          :style="getSegmentStyle(item, index === activeIndex)"
-          @click="jumpToSegment(item, index)"
-        >
-          <div class="segment-top">
-            <div class="speaker-wrap">
-              <img class="avatar" :src="item.defaultPic" alt="avatar" />
-              <div class="speaker-info">
-                <div class="speaker-name">
-                  {{ item.spkName || `发言人${item.spk ?? ''}` }}
+        <template #default="{ item, index, active }">
+          <DynamicScrollerItem
+            :item="item"
+            :active="active"
+            :size-dependencies="[item.onebest, item.beginTimeStr, item.endTimeStr, item.spkName]"
+          >
+            <!-- 每个段落：发言人、时间范围、文本；当前播放项高亮并可点击跳转 -->
+            <div
+              :ref="el => setSegmentRef(el, index)"
+              :data-segment-index="index"
+              class="segment"
+              :class="{ active: index === activeIndex }"
+              :style="getSegmentStyle(item, index === activeIndex)"
+              @click="jumpToSegment(index)"
+            >
+              <div class="segment-top">
+                <div class="speaker-wrap">
+                  <img class="avatar" :src="item.defaultPic" alt="avatar" />
+                  <div class="speaker-info">
+                    <div class="speaker-name">
+                      {{ item.spkName || `发言人${item.spk ?? ''}` }}
+                    </div>
+                    <div class="segment-time">
+                      {{ item.beginTimeStr || formatTime(item.begin) }}
+                      -
+                      {{ item.endTimeStr || formatTime(item.end) }}
+                    </div>
+                  </div>
                 </div>
-                <div class="segment-time">
-                  {{ item.beginTimeStr || formatTime(item.begin) }}
-                  -
-                  {{ item.endTimeStr || formatTime(item.end) }}
-                </div>
+
+                <div class="playing-tag" :class="{ visible: index === activeIndex }">播放中</div>
+              </div>
+
+              <div class="segment-text">
+                {{ item.onebest }}
               </div>
             </div>
-
-            <div v-if="index === activeIndex" class="playing-tag">播放中</div>
-          </div>
-
-          <div class="segment-text">
-            {{ item.onebest }}
-          </div>
-        </div>
-      </div>
+          </DynamicScrollerItem>
+        </template>
+      </DynamicScroller>
     </div>
   </div>
 </template>
 
 <script setup>
 import { computed, nextTick, onBeforeUnmount, onMounted, ref, shallowRef, watch } from 'vue'
+import { DynamicScroller, DynamicScrollerItem } from 'vue-virtual-scroller'
 import popUrl from '@/assets/media/pop.mp3'
 import { audioList } from '../data/audioList'
 
-// ========== 数据源 ==========
-/** 音频文件地址。接入项目时替换为接口返回的音频 URL */
-// （popUrl 由 import 得到，此处使用示例资源）
-
-/**
- * 转写段落列表（后端数据结构）
- * 每项需包含：id, begin, end, onebest（文本）, spk/spkName, defaultPic 等
- * 实际项目中将 transcript.value 赋值为接口返回的转写数据即可
- */
 const transcript = ref(audioList)
 
-// ========== DOM 引用 ==========
-/** <audio> 元素引用，用于读取 currentTime、控制播放与跳转 */
 const audioRef = ref(null)
-/** 转写列表的滚动容器，用于计算滚动位置与执行 scrollTo */
-const transcriptContainerRef = ref(null)
-/** 各段落 DOM 元素数组，用于 scrollToSegment 时获取元素位置；shallowRef 避免大列表深响应 */
+const transcriptScrollerRef = ref(null)
 const segmentRefs = shallowRef([])
+const segmentMinSize = 120
+const segmentBuffer = 600
 
-// ========== 播放与高亮状态 ==========
-/** 当前播放时间（秒），用于显示与计算当前段落 */
 const currentTime = ref(0)
-/** 当前高亮段落索引，-1 表示无 */
 const activeIndex = ref(-1)
-/** 用户是否正在手动滚动转写列表；为 true 时暂停自动滚动跟随 */
-const userScrolling = ref(false)
-/** 用户是否正在拖动进度条（seeking），用于在 seeked 时用二分查找而非游标定位 */
-const isSeeking = ref(false)
-
-/**
- * 游标索引（播放同步优化）
- * 正常顺序播放时，当前段落通常等于上一帧的段落或下一段，用游标可减少二分查找次数
- */
-const cursorIndex = ref(0)
-
-// ========== 定时器 / 动画帧 ==========
-/** requestAnimationFrame 句柄，播放时用于 syncLoop，暂停时取消 */
+const followPlayback = ref(true)
 let rafId = null
-/** 用户滚动结束后的重置定时器：一段时间无滚动后将 userScrolling 置为 false */
-let userScrollTimer = null
+let autoScrollUntil = 0
+const scrollPaddingTop = 50
+const scrollPaddingBottom = 80
 
-/**
- * 当前展示的封面图
- * 优先使用当前高亮段落的 defaultPic，否则使用第一段的封面
- */
 const currentCover = computed(() => {
-  if (activeIndex.value >= 0 && transcript.value[activeIndex.value]?.defaultPic) {
-    return transcript.value[activeIndex.value].defaultPic
-  }
-  return transcript.value[0]?.defaultPic || ''
+  return transcript.value[activeIndex.value]?.defaultPic || transcript.value[0]?.defaultPic || ''
 })
 
-/**
- * 监听 transcript 长度变化（如切换音频/重新拉取转写）
- * 重置段落 refs、游标和当前高亮，避免旧索引指向错误或越界
- */
 watch(
   () => transcript.value.length,
   () => {
     segmentRefs.value = []
-    cursorIndex.value = 0
     activeIndex.value = -1
+    followPlayback.value = true
   }
 )
 
-// ========== 工具函数 ==========
-
-/**
- * 将秒数格式化为 HH:MM:SS 字符串
- * @param {number | null | undefined} sec - 秒数（可为 null/undefined/NaN）
- * @returns {string} 如 "01:23:45"
- */
 function formatTime(sec) {
   if (sec == null || Number.isNaN(sec)) return '00:00:00'
   const total = Math.floor(sec)
@@ -184,32 +155,15 @@ function formatTime(sec) {
   ].join(':')
 }
 
-/**
- * v-for 中用于收集每个段落 DOM 的 ref 回调
- * @param {HTMLElement | null} el - 段落元素（卸载时为 null）
- * @param {number} index - 段落索引
- */
 function setSegmentRef(el, index) {
-  if (el) {
-    segmentRefs.value[index] = el
-  }
+  segmentRefs.value[index] = el || undefined
 }
 
-/**
- * 根据段落数据与是否当前播放返回段落样式（背景、文字色、边框）
- * @param {Object} item - 段落数据，可含 backgroundColor / fontColor / borderColor
- * @param {boolean} isActive - 是否为当前播放段落
- * @returns {Object} 用于 :style 的对象
- */
 function getSegmentStyle(item, isActive) {
-  const backgroundColor = isActive ? item.backgroundColor || '#F5F7FF' : '#fff'
-  const color = item.fontColor || '#333'
-  const border = isActive ? item.borderColor || '1px solid #d9d9d9' : '1px solid #ececec'
-
   return {
-    background: backgroundColor,
-    color,
-    border,
+    background: isActive ? item.backgroundColor || '#F5F7FF' : '#fff',
+    color: item.fontColor || '#333',
+    border: isActive ? item.borderColor || '1px solid #d9d9d9' : '1px solid #ececec',
   }
 }
 
@@ -220,7 +174,8 @@ function getSegmentStyle(item, isActive) {
  * @param {number} time - 当前时间（秒）
  * @returns {number} 段落索引，未找到返回 -1；若 time 在某段之前则返回最后一个 begin <= time 的索引（right）
  */
-function binarySearchSegment(segments, time) {
+function findSegmentIndex(time) {
+  const segments = transcript.value
   let left = 0
   let right = segments.length - 1
 
@@ -237,67 +192,66 @@ function binarySearchSegment(segments, time) {
     }
   }
 
-  if (right >= 0) return right
-  return -1
+  return right >= 0 ? right : -1
+}
+
+function markAutoScrolling(smooth) {
+  autoScrollUntil = performance.now() + (smooth ? 900 : 240)
+}
+
+function isAutoScrolling() {
+  return performance.now() < autoScrollUntil
+}
+
+function disableFollow() {
+  if (!isAutoScrolling()) {
+    followPlayback.value = false
+  }
 }
 
 /**
- * 根据当前播放时间，用游标方式计算当前段落索引（用于正常顺序播放）
- * 游标从上一帧的 cursorIndex 开始向前/向后微调，避免每次都用二分查找，提高性能
- * @param {number} time - 当前播放时间（秒）
- * @returns {number} 段落索引
+ * 判断某个段落元素是否已处于可视区
+ * @param {HTMLElement} el - 段落元素
+ * @param {HTMLElement} container - 滚动容器
+ * @returns {boolean}
  */
-function getActiveIndexByCursor(time) {
-  const segments = transcript.value
-  if (!segments.length) return -1
+function isSegmentInView(el, container) {
+  const elRect = el.getBoundingClientRect()
+  const containerRect = container.getBoundingClientRect()
+  const elTopInContainer = elRect.top - containerRect.top
+  const elBottomInContainer = elRect.bottom - containerRect.top
 
-  let i = cursorIndex.value
-
-  if (i < 0) i = 0
-  if (i >= segments.length) i = segments.length - 1
-
-  const current = segments[i]
-  if (current && time >= current.begin && time <= current.end) {
-    return i
-  }
-
-  while (i + 1 < segments.length && time > segments[i].end) {
-    i++
-    const seg = segments[i]
-    if (time >= seg.begin && time <= seg.end) {
-      cursorIndex.value = i
-      return i
-    }
-  }
-
-  while (i - 1 >= 0 && time < segments[i].begin) {
-    i--
-    const seg = segments[i]
-    if (time >= seg.begin && time <= seg.end) {
-      cursorIndex.value = i
-      return i
-    }
-  }
-
-  const idx = binarySearchSegment(segments, time)
-  cursorIndex.value = Math.max(idx, 0)
-  return idx
+  return (
+    elTopInContainer >= scrollPaddingTop &&
+    elBottomInContainer <= container.clientHeight - scrollPaddingBottom
+  )
 }
 
 /**
- * 根据播放时间计算当前应高亮的段落索引
- * seeking 为 true 时（拖进度条、初始加载）用二分查找；否则用游标方式
+ * 将显示时间同步为整秒，减少播放中高频重渲染
  * @param {number} time - 当前播放时间（秒）
- * @param {boolean} [seeking=false] - 是否处于 seek 场景
- * @returns {number} 段落索引
  */
-function getActiveIndex(time, seeking = false) {
-  if (seeking) {
-    const idx = binarySearchSegment(transcript.value, time)
-    cursorIndex.value = Math.max(idx, 0)
-    return idx
+function syncDisplayedTime(time) {
+  const displayTime = Math.floor(time || 0)
+  if (displayTime !== currentTime.value) {
+    currentTime.value = displayTime
   }
-  return getActiveIndexByCursor(time)
+}
+
+/**
+ * 获取当前已渲染的目标段落元素。
+ * 虚拟列表复用节点时，优先校验 ref 是否仍属于当前索引；否则回退到 DOM 查询。
+ * @param {HTMLElement} container - 滚动容器
+ * @param {number} index - 段落索引
+ * @returns {HTMLElement | null}
+ */
+function getRenderedSegmentElement(container, index) {
+  const refEl = segmentRefs.value[index]
+  if (refEl && container.contains(refEl) && Number(refEl.dataset.segmentIndex) === index) {
+    return refEl
+  }
+
+  return container.querySelector(`[data-segment-index="${index}"]`)
 }
 
 /**
@@ -306,55 +260,68 @@ function getActiveIndex(time, seeking = false) {
  * @param {number} index - 段落索引
  * @param {boolean} [smooth=true] - 是否平滑滚动
  */
-function scrollToSegment(index, smooth = true) {
-  const container = transcriptContainerRef.value
-  const el = segmentRefs.value[index]
-  if (!container || !el || index < 0) return
+function scrollToSegment(index, smooth = true, retries = 12) {
+  const scroller = transcriptScrollerRef.value
+  const container = scroller?.$el || null
+  if (!container || index < 0) return
 
-  // 使用相对 transcriptContainer 的位置，而不是整个窗口
-  const elRect = el.getBoundingClientRect()
-  const containerRect = container.getBoundingClientRect()
+  const alignVisibleSegment = el => {
+    if (!el) return
 
-  // 当前元素在容器可视区域内的相对 top/bottom
-  const elTopInContainer = elRect.top - containerRect.top
-  const elBottomInContainer = elRect.bottom - containerRect.top
+    if (isSegmentInView(el, container)) return
 
-  const paddingTop = 50
-  const paddingBottom = 80
+    const elRect = el.getBoundingClientRect()
+    const containerRect = container.getBoundingClientRect()
+    const elTopInContainer = elRect.top - containerRect.top
+    const centerOffset = (container.clientHeight - el.offsetHeight) / 2
+    const targetTop =
+      container.scrollTop + elTopInContainer - Math.max(centerOffset, scrollPaddingTop)
 
-  const inView =
-    elTopInContainer >= paddingTop && elBottomInContainer <= container.clientHeight - paddingBottom
+    markAutoScrolling(smooth)
+    container.scrollTo({
+      top: targetTop,
+      behavior: smooth ? 'smooth' : 'auto',
+    })
+  }
 
-  if (inView) return
+  const waitForRenderedSegment = (remainingFrames = retries) => {
+    const el = getRenderedSegmentElement(container, index)
+    if (el) {
+      alignVisibleSegment(el)
+      return
+    }
 
-  // 目标 scrollTop：让当前元素靠近容器中间
-  const centerOffset = (container.clientHeight - el.offsetHeight) / 2
-  const targetTop = container.scrollTop + elTopInContainer - Math.max(centerOffset, paddingTop)
+    if (remainingFrames <= 0) return
 
-  container.scrollTo({
-    top: targetTop,
-    behavior: smooth ? 'smooth' : 'auto',
-  })
+    requestAnimationFrame(() => waitForRenderedSegment(remainingFrames - 1))
+  }
+
+  const currentEl = getRenderedSegmentElement(container, index)
+  if (currentEl) {
+    alignVisibleSegment(currentEl)
+    return
+  }
+
+  markAutoScrolling(false)
+  scroller?.scrollToItem?.(index)
+  nextTick(() => requestAnimationFrame(() => waitForRenderedSegment()))
 }
 
-/**
- * 更新当前高亮段落并可选地滚动到该段落
- * 若用户正在手动滚动（userScrolling），则不自动滚动，避免打断阅读
- * @param {number} nextIndex - 新的高亮段落索引
- * @param {Object} [options] - fromSeek: 是否来自 seek，为 true 时使用非平滑滚动
- */
-function updateActiveIndex(nextIndex, options = {}) {
-  const { fromSeek = false } = options
+function setActiveSegment(index, options = {}) {
+  const { scroll = followPlayback.value, smooth = true, forceScroll = false } = options
+  const changed = index !== activeIndex.value
 
-  if (nextIndex === activeIndex.value) return
+  if (changed) {
+    activeIndex.value = index
+  }
 
-  activeIndex.value = nextIndex
+  if (!scroll || index < 0 || (!changed && !forceScroll)) return
+  nextTick(() => scrollToSegment(index, smooth))
+}
 
-  nextTick(() => {
-    if (!userScrolling.value) {
-      scrollToSegment(nextIndex, !fromSeek)
-    }
-  })
+function followSegment(index, smooth = false) {
+  followPlayback.value = true
+  setActiveSegment(index, { scroll: true, smooth, forceScroll: true })
 }
 
 /**
@@ -370,10 +337,9 @@ function syncLoop() {
   }
 
   const time = audio.currentTime || 0
-  currentTime.value = time
+  syncDisplayedTime(time)
 
-  const nextIndex = getActiveIndex(time, false)
-  updateActiveIndex(nextIndex)
+  setActiveSegment(findSegmentIndex(time))
 
   rafId = requestAnimationFrame(syncLoop)
 }
@@ -394,83 +360,57 @@ function stopSyncLoop() {
 
 /**
  * 点击某段转写文本：跳转到该段开始时间并播放
- * @param {Object} item - 段落数据，需含 begin
  * @param {number} index - 段落索引
  */
-function jumpToSegment(item, index) {
+function jumpToSegment(index) {
+  playSegmentByIndex(index)
+}
+
+/**
+ * 设置播放器时间并同步高亮段落
+ * @param {number} time - 目标播放时间
+ * @param {number} index - 目标段落索引
+ * @param {boolean} [shouldPlay=true] - 是否继续播放
+ */
+function seekToSegment(index, shouldPlay = true) {
   const audio = audioRef.value
-  if (!audio) return
+  const segment = transcript.value[index]
+  if (!audio || !segment) return
 
-  audio.currentTime = item.begin
-  currentTime.value = item.begin
-  cursorIndex.value = index
+  audio.currentTime = segment.begin
+  syncDisplayedTime(segment.begin)
+  followSegment(index)
 
-  updateActiveIndex(index, { fromSeek: true })
-  audio.play()
+  if (shouldPlay) {
+    audio.play()
+  }
 }
 
 /**
  * 按段落索引播放：将播放位置设为该段 begin，更新游标与高亮，并开始播放
- * 同时清除 userScrolling，使自动滚动重新生效
  * @param {number} index - 目标段落索引（会被 clamp 到有效范围）
  */
 function playSegmentByIndex(index) {
-  const segments = transcript.value
-  const audio = audioRef.value
-  if (!audio || !segments.length) return
-
-  const safeIndex = Math.min(Math.max(index, 0), segments.length - 1)
-  const seg = segments[safeIndex]
-
-  audio.currentTime = seg.begin
-  currentTime.value = seg.begin
-  cursorIndex.value = safeIndex
-
-  userScrolling.value = false
-
-  updateActiveIndex(safeIndex, { fromSeek: true })
-  audio.play()
+  if (!transcript.value.length) return
+  const safeIndex = Math.min(Math.max(index, 0), transcript.value.length - 1)
+  seekToSegment(safeIndex)
 }
 
 /** 播放上一句：当前为第一句时仍停留在第一句 */
 function playPrevSegment() {
-  const current = activeIndex.value
-  const target = current <= 0 ? 0 : current - 1
-  playSegmentByIndex(target)
+  playSegmentByIndex(activeIndex.value <= 0 ? 0 : activeIndex.value - 1)
 }
 
 /** 播放下一句：当前为最后一句时不再前进 */
 function playNextSegment() {
-  const segments = transcript.value
-  if (!segments.length) return
-
-  const current = activeIndex.value
-  const target = current < 0 ? 0 : Math.min(current + 1, segments.length - 1)
-  playSegmentByIndex(target)
+  playSegmentByIndex(activeIndex.value < 0 ? 0 : activeIndex.value + 1)
 }
 
-/**
- * 转写列表滚动事件：标记为用户手动滚动
- * 通过短延时重置 userScrolling，避免滚动惯性期间仍被当作“用户在滚动”
- */
-function handleTranscriptScroll() {
-  userScrolling.value = true
-
-  if (userScrollTimer) {
-    clearTimeout(userScrollTimer)
-  }
-
-  userScrollTimer = setTimeout(() => {
-    userScrolling.value = false
-  }, 150)
-}
-
-/** 「回到当前播放位置」：取消手动滚动标记，并平滑滚动到当前高亮段落 */
+/** 「回到当前播放位置」：恢复自动跟随，并平滑滚动到当前高亮段落 */
 function backToCurrent() {
-  userScrolling.value = false
-  if (activeIndex.value >= 0) {
-    scrollToSegment(activeIndex.value, true)
-  }
+  const time = audioRef.value?.currentTime || 0
+  const index = activeIndex.value >= 0 ? activeIndex.value : findSegmentIndex(time)
+  followSegment(index, true)
 }
 
 // ========== Audio 元素事件 ==========
@@ -485,28 +425,14 @@ function handlePause() {
   stopSyncLoop()
 }
 
-/** 用户开始拖动进度条：标记 seeking，seeked 时用二分查找定位段落 */
-function handleSeeking() {
-  isSeeking.value = true
-}
-
 /**
  * 用户拖动进度条结束：根据当前时间用二分查找更新高亮段落与滚动位置
- * 并清除 userScrolling，使后续播放时恢复自动跟随
+ * 这是用户主动改播放位置的行为，因此会重新进入自动跟随模式
  */
 function handleSeeked() {
-  const audio = audioRef.value
-  if (!audio) return
-
-  const time = audio.currentTime || 0
-  currentTime.value = time
-
-  userScrolling.value = false
-
-  const idx = getActiveIndex(time, true)
-  updateActiveIndex(idx, { fromSeek: true })
-
-  isSeeking.value = false
+  const time = audioRef.value?.currentTime || 0
+  syncDisplayedTime(time)
+  followSegment(findSegmentIndex(time))
 }
 
 /**
@@ -514,31 +440,21 @@ function handleSeeked() {
  * 根据当前 currentTime 初始化高亮段落（例如初始为 0 时高亮第一段）
  */
 function handleLoadedMetadata() {
-  const audio = audioRef.value
-  if (!audio) return
-
-  const time = audio.currentTime || 0
-  currentTime.value = time
-
-  const idx = getActiveIndex(time, true)
-  updateActiveIndex(idx, { fromSeek: true })
+  const time = audioRef.value?.currentTime || 0
+  syncDisplayedTime(time)
+  followSegment(findSegmentIndex(time))
 }
 
 // ========== 生命周期 ==========
 
 /** 挂载时根据初始时间（通常为 0）设置一次高亮与滚动位置 */
 onMounted(() => {
-  const idx = getActiveIndex(0, true)
-  updateActiveIndex(idx, { fromSeek: true })
+  followSegment(findSegmentIndex(0))
 })
 
-/** 卸载前取消同步循环与滚动重置定时器，防止内存泄漏 */
+/** 卸载前取消同步循环，防止内存泄漏 */
 onBeforeUnmount(() => {
   stopSyncLoop()
-  if (userScrollTimer) {
-    clearTimeout(userScrollTimer)
-    userScrollTimer = null
-  }
 })
 </script>
 
@@ -668,14 +584,13 @@ onBeforeUnmount(() => {
   padding: 16px;
   cursor: pointer;
   transition:
-    transform 0.16s ease,
     box-shadow 0.16s ease,
-    background 0.16s ease;
+    background-color 0.16s ease,
+    border-color 0.16s ease;
   margin-bottom: 14px;
 }
 
 .segment:hover {
-  transform: translateY(-1px);
   box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
 }
 
@@ -732,6 +647,14 @@ onBeforeUnmount(() => {
   background: rgba(22, 119, 255, 0.1);
   color: #1677ff;
   font-weight: 600;
+  visibility: hidden;
+  opacity: 0;
+  transition: opacity 0.16s ease;
+}
+
+.playing-tag.visible {
+  visibility: visible;
+  opacity: 1;
 }
 
 .segment-text {
