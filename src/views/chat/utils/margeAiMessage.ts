@@ -7,22 +7,36 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
   const messages: StreamResponse[] = []
   // AI输出内容文本
   aiMessage.messages.forEach(messageChunk => {
+    // 防御性检查：确保 messageChunk 对象存在
+    if (!messageChunk) {
+      return
+    }
+
     if (messageChunk.type === ChatResponseType.TOOL_RESULT) {
       // 处理工具返回结果
       messageChunk._is_expanded = true
       if (typeof messageChunk.content === 'string') {
-        messageChunk.content = JSON.parse(messageChunk.content)
+        try {
+          messageChunk.content = JSON.parse(messageChunk.content)
+        } catch (e) {
+          // JSON解析失败，保留原始内容
+          console.error('Failed to parse message content:', e)
+        }
       }
-      messages.push(messageChunk)
+      // 防御性检查：确保 content 存在且为对象后再访问其属性
+      if (messageChunk.content && typeof messageChunk.content === 'object') {
+        messages.push(messageChunk)
+      }
     } else if (messageChunk.type === ChatResponseType.DONE) {
       // 处理完成，折叠所有工具返回结果
       messages.forEach(item => {
-        if (item.type === ChatResponseType.TOOL_RESULT) {
+        if (item && item.type === ChatResponseType.TOOL_RESULT) {
           item._is_expanded = false
         }
       })
       messages.push(messageChunk)
     } else if (
+      messageChunk.type &&
       [
         ChatResponseType.PING,
         ChatResponseType.ERROR,
@@ -44,7 +58,10 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
           messages.push(messageChunk)
         } else {
           // 已经添加进去了，需要合并
-          lastMessage.content += messageChunk.content
+          // 防御性检查：确保 content 是字符串再拼接
+          if (typeof lastMessage.content === 'string' && typeof messageChunk.content === 'string') {
+            lastMessage.content += messageChunk.content
+          }
         }
       }
     }
@@ -58,8 +75,14 @@ export const transformMessageItem = (aiMessage: ConversationHistory) => {
 export const margeAiMessage = (message: ConversationHistory[]) => {
   // 格式化消息列表
   const result: ConversationHistory[] = []
+  if (!Array.isArray(message)) {
+    console.error('margeAiMessage received non-array input:', message)
+    return result
+  }
   message.forEach(item => {
-    result.push(transformMessageItem(item))
+    if (item) {
+      result.push(transformMessageItem(item))
+    }
   })
   return result
 }
